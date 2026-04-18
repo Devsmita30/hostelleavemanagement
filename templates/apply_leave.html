@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Leave Application Form</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,21 +9,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body{
-            background: linear-gradient(to right,#16222a,#3a6073);
+        body {
+            background: linear-gradient(to right, #16222a, #3a6073);
             font-family: Arial, sans-serif;
         }
 
-        .main-container{
+        .main-container {
             max-width: 1000px;
             margin: 40px auto;
             background-color: white;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
-        .section-title{
+        .section-title {
             font-weight: bold;
             margin-bottom: 15px;
             color: #3a6073;
@@ -30,7 +31,7 @@
             padding-left: 8px;
         }
 
-        .btn-submit{
+        .btn-submit {
             background-color: #3a6073;
             color: white;
             padding: 8px 30px;
@@ -38,7 +39,7 @@
             border-radius: 5px;
         }
 
-        .btn-submit:hover{
+        .btn-submit:hover {
             background-color: #16222a;
         }
     </style>
@@ -46,148 +47,149 @@
 
 <body>
 
-<div class="main-container">
+    <div class="main-container">
 
-    <!-- LOGO IMAGE  -->
-    <div class="text-center mb-3">
-        <img src="{% static 'images/logo.png' %}" width="200" alt="University Logo">
-    </div>
-
-    <div class="text-center mb-4">
-        <h3>Leave Application Form</h3>
-        <p>(Only for Hosteller)</p>
-    </div>
-
-    <!-- Form Submit -->
-    <form method="POST" class="needs-validation" enctype="multipart/form-data" novalidate>
-        {% csrf_token %}
-
-    <!-- ================= STUDENT DETAILS ================= -->
-    <div class="student-details mb-4">
-        <div class="section-title">Student Details</div>
-
-        <div class="row">
-
-            <div class="col-md-6 mb-3">
-                <label>Full Name *</label>
-                <input type="text" name="name" class="form-control" required>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label>Enrollment Number *</label>
-                <input type="text" name="enrollment" class="form-control" required>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label>Hostel Name *</label>
-                <select name="hostel" class="form-select" required>
-                    <option disabled selected>-- Choose Hostel --</option>
-                    <option>Hostel Block A</option>
-                    <option>Hostel Block B</option>
-                    <option>Hostel Block C</option>
-                    <option>Hostel Block D</option>
-                    <option>Hostel Block E</option>
-                    <option>Hostel Block F</option>
-                    <option>Hostel Block G</option>
-                    <option>Hostel Block H</option>
-                </select>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label>Room Number *</label>
-                <input type="text" name="room" class="form-control" required>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label>Student Contact *</label>
-                <input type="tel" name="student_contact" class="form-control" required>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label>Student Email *</label>
-                <input type="email" name="student_email" class="form-control" required>
-            </div>
-
+        <!-- LOGO IMAGE  -->
+        <div class="text-center mb-3">
+            <img src="{% static 'images/logo.png' %}" width="200" alt="University Logo">
         </div>
-    </div>
-    <div class="col-md-6 mb-3">
-        <label>Parent / Guardian Name *</label>
-        <input type="text" name="parent_name" class="form-control" required>
-    </div>
-    <div class="col-md-6 mb-3">
-        <label>Parent / Guardian Phone *</label>
-        <input type="tel" name="parent_phone" class="form-control" required>
-    </div>
 
-    <!-- ================= LEAVE DETAILS ================= -->
-    <div class="leave-details mb-4">
-        <div class="section-title">Leave Details</div>
-
-        <div class="row">
-
-            <div class="col-md-6 mb-3">
-                <label>Start Date *</label>
-                <input type="date" name="from_date" class="form-control" required>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label>End Date *</label>
-                <input type="date" name="to_date" class="form-control" required>
-            </div>
-
-            <div class="col-md-6 mb-3">
-                <label>Travel Mode *</label><br>
-
-                <input type="radio" name="travel_mode" value="Bus" required> Bus
-                <input type="radio" name="travel_mode" value="Train"> Train
-                <input type="radio" name="travel_mode" value="Flight"> Flight
-                <input type="radio" name="travel_mode" value="Own Vehicle"> Own Vehicle
-            </div>
-
-            <div class="col-md-12 mb-3">
-                <label>Address During Leave *</label>
-                <textarea name="leave_address" class="form-control" rows="2" required></textarea>
-            </div>
-
-            <div class="col-md-12 mb-3">
-                <label>City / State / PIN *</label>
-                <input type="text" name="city_state_pin" class="form-control" required>
-            </div>
-
-            <div class="col-md-12 mb-3">
-                <label>Reason *</label>
-                <textarea name="reason" class="form-control" rows="3" required></textarea>
-            </div>
-
+        <div class="text-center mb-4">
+            <h3>Leave Application Form</h3>
+            <p>(Only for Hosteller)</p>
         </div>
+
+        <!-- Form Submit -->
+        <form method="POST" class="needs-validation" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            <!-- ================= STUDENT DETAILS ================= -->
+            <div class="student-details mb-4">
+                <div class="section-title">Student Details</div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label>Full Name *</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Enrollment Number *</label>
+                        <input type="text" name="enrollment" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Hostel Name *</label>
+                        <select name="hostel" class="form-select" required>
+                            <option disabled selected>-- Choose Hostel --</option>
+                            <option>Hostel Block A</option>
+                            <option>Hostel Block B</option>
+                            <option>Hostel Block C</option>
+                            <option>Hostel Block D</option>
+                            <option>Hostel Block E</option>
+                            <option>Hostel Block F</option>
+                            <option>Hostel Block G</option>
+                            <option>Hostel Block H</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Room Number *</label>
+                        <input type="text" name="room" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Student Contact *</label>
+                        <input type="tel" name="student_contact" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Student Email *</label>
+                        <input type="email" name="student_email" class="form-control" required>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Parent / Guardian Name *</label>
+                <input type="text" name="parent_name" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label>Parent / Guardian Phone *</label>
+                <input type="tel" name="parent_phone" class="form-control" required>
+            </div>
+
+            <!-- ================= LEAVE DETAILS ================= -->
+            <div class="leave-details mb-4">
+                <div class="section-title">Leave Details</div>
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <label>Start Date *</label>
+                        <input type="date" name="from_date" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>End Date *</label>
+                        <input type="date" name="to_date" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label>Travel Mode *</label><br>
+
+                        <input type="radio" name="travel_mode" value="Bus" required> Bus
+                        <input type="radio" name="travel_mode" value="Train"> Train
+                        <input type="radio" name="travel_mode" value="Flight"> Flight
+                        <input type="radio" name="travel_mode" value="Own Vehicle"> Own Vehicle
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label>Address During Leave *</label>
+                        <textarea name="leave_address" class="form-control" rows="2" required></textarea>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label>City / State / PIN *</label>
+                        <input type="text" name="city_state_pin" class="form-control" required>
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label>Reason *</label>
+                        <textarea name="reason" class="form-control" rows="3" required></textarea>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ================= SUBMIT ================= -->
+            <div class="text-center">
+                <button type="submit" class="btn-submit">Submit Leave Request</button>
+            </div>
+
+        </form>
+
     </div>
 
-    <!-- ================= SUBMIT ================= -->
-    <div class="text-center">
-        <button type="submit" class="btn-submit">Submit Leave Request</button>
-    </div>
-
-    </form>
-
-</div>
-
-<!-- Bootstrap Validation Script -->
-<script>
-(function () {
-'use strict'
-var forms = document.querySelectorAll('.needs-validation')
-Array.prototype.slice.call(forms)
-.forEach(function (form) {
-form.addEventListener('submit', function (event) {
-if (!form.checkValidity()) {
-event.preventDefault()
-event.stopPropagation()
-}
-form.classList.add('was-validated')
-}, false)
-})
-})()
-</script>
+    <!-- Bootstrap Validation Script -->
+    <script>
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                        form.classList.add('was-validated')
+                    }, false)
+                })
+        })()
+    </script>
 
 </body>
+
 </html>
