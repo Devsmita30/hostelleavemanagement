@@ -157,7 +157,20 @@ def rector_dashboard(request):
         student__hostel_block=hostel
     )
 
-    return render(request, "rector.html", {"leaves": leaves})
+    total = Leave.objects.filter(student__hostel_block=hostel).count()
+    approved = Leave.objects.filter(student__hostel_block=hostel, rector_status="Approved").count()
+    rejected = Leave.objects.filter(student__hostel_block=hostel, rector_status="Rejected").count()
+    pending = leaves.count()
+    history = Leave.objects.filter(student__hostel_block=hostel).exclude(rector_status="Pending")
+
+    return render(request, "rector.html", {
+        "pending_final": leaves,
+        "total": total,
+        "pending": pending,
+        "approved": approved,
+        "rejected": rejected,
+        "history": history
+    })
 
 # --------------- APPROVE / REJECT ------------
 def rector_approve(request, id):
@@ -201,8 +214,13 @@ def proctor_dashboard(request):
         proctor_status="Pending"
     )
 
+    history_leaves = Leave.objects.filter(
+        rector_status="Approved"
+    ).exclude(proctor_status="Pending")
+
     return render(request, "proctor.html", {
-        "leaves": leaves
+        "pending_leaves": leaves,
+        "history_leaves": history_leaves
     })
 
 def proctor_approve(request, id):
@@ -233,8 +251,13 @@ def hod_dashboard(request):
         hod_status="Pending"
     )
 
+    history_leaves = Leave.objects.filter(
+        proctor_status="Approved"
+    ).exclude(hod_status="Pending")
+
     return render(request, "hod.html", {
-        "leaves": leaves
+        "escalated_leaves": leaves,
+        "history_leaves": history_leaves
     })
 
 def hod_approve(request, id):

@@ -244,14 +244,16 @@
 
         <!-- Sidebar -->
         <div class="sidebar">
-            <a href="{% url 'rector_dashboard' %}" class="active">Dashboard</a>
-            <a href="#">Final Approvals</a>
-            <a href="#">History</a>
+            <a href="#" class="active" data-target="dashboard">Dashboard</a>
+            <a href="#" data-target="frame">Final Approvals</a>
+            <a href="#" data-target="frame">History</a>
             <a href="{% url 'logout' %}">Logout</a>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
+            
+            <div id="default-dashboard-content">
 
             <h2 style="margin-bottom: 20px; color: #1e293b;">Rector Dashboard</h2>
 
@@ -344,12 +346,38 @@
                     </tr>
                     {% endfor %}
                 </table>
-            </div>
+            </div> <!-- End default-dashboard-content -->
+            
+            <!-- Iframe Container -->
+            <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 8px;"></iframe>
 
         </div>
 
     </div>
 
-</body>
+    <script>
+        document.querySelectorAll('.sidebar a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (this.getAttribute('href').includes('logout')) return;
 
+                if (this.getAttribute('data-target') === 'frame') {
+                    if (this.getAttribute('href') === '#') e.preventDefault(); // ignore empty links
+                    document.getElementById('default-dashboard-content').style.display = 'none';
+                    document.getElementById('dashboard_frame').style.display = 'block';
+                    
+                    document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                } 
+                else if (this.getAttribute('data-target') === 'dashboard') {
+                    e.preventDefault();
+                    document.getElementById('default-dashboard-content').style.display = 'block';
+                    document.getElementById('dashboard_frame').style.display = 'none';
+
+                    document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
 </html>
