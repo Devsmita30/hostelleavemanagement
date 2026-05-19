@@ -85,7 +85,7 @@
 
 <div class="navbar">
     <h2>HOD Dashboard</h2>
-    <div>Welcome, {{ request.user.username }} | Logout</div>
+    <div>Welcome, {{ request.session.hod_username  }} | <a href="{% url 'logout' %}">Logout</a></div>
 </div>
 
 <div class="container">
@@ -94,7 +94,7 @@
         <a href="#" class="active">Dashboard</a>
         <a href="#">Escalated Leaves</a>
         <a href="#">History</a>
-        <a href="#">Logout</a>
+        <a href="{% url 'logout' %}">Logout</a>
     </div>
 
     <div class="main">

@@ -137,7 +137,7 @@
 
 <div class="navbar">
     <h2>Proctor Dashboard</h2>
-    <div>Welcome, {{ request.user.username }} | Logout</div>
+    <div>Welcome, {{ request.session.proctor_username  }} | <a href="{% url 'logout' %}">Logout</a></div>
 </div>
 
 <div class="container">
@@ -147,7 +147,7 @@
         <a href="#" class="active">Dashboard</a>
         <a href="#">Pending Requests</a>
         <a href="#">History</a>
-        <a href="#">Logout</a>
+        <a href="{% url 'logout' %}">Logout</a>
     </div>
 
     <!-- Main Content -->

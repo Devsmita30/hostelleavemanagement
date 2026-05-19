@@ -237,7 +237,7 @@
     <!-- Navbar -->
     <div class="navbar">
         <h2>College Leave Management</h2>
-        <div class="profile">Welcome, {{ request.user.username }} | <a href="{% url 'logout' %}">Logout</a></div>
+        <div class="profile">Welcome, {{ request.session.rector_username  }} | <a href="{% url 'logout' %}">Logout</a></div>
     </div>
 
     <div class="container">
@@ -276,6 +276,34 @@
                     <h3>{{ rejected }}</h3>
                     <p>Rejected</p>
                 </div>
+            </div>
+
+            <div class="section-card">
+                <h3>Unverified Students</h3>
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Enrollment</th>
+                        <th>Hostel</th>
+                        <th>Action</th>
+                    </tr>
+                    {% for student in unverified_students %}
+                    <tr>
+                        <td>{{ student.full_name }}</td>
+                        <td>{{ student.enrollment_no }}</td>
+                        <td>{{ student.hostel_block }}</td>
+                        <td>
+                            <a href="{% url 'verify_student' student.id %}">
+                                <button class="btn approve">Verify</button>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">No students to verify</td>
+                    </tr>
+                    {% endfor %}
+                </table>
             </div>
 
             <!-- Pending Final Approvals Table -->
@@ -333,8 +361,8 @@
                         <td>{{ leave.from_date }}</td>
                         <td>{{ leave.to_date }}</td>
                         <td>
-                            <span class="status {{ leave.status|lower }}">
-                                {{ leave.status }}
+                            <span class="status {{ leave.rector_status|lower }}">
+                                {{ leave.rector_status }}
                             </span>
                         </td>
                     </tr>
