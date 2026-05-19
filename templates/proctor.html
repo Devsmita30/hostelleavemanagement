@@ -170,7 +170,7 @@
 
                 {% for leave in pending_leaves %}
                 <tr>
-                    <td>{{ leave.student.name }}</td>
+                    <td>{{ leave.student.full_name }}</td>
                     <td>{{ leave.from_date }}</td>
                     <td>{{ leave.to_date }}</td>
                     <td>{{ leave.reason }}</td>
@@ -212,7 +212,7 @@
 
                 {% for leave in history_leaves %}
                 <tr>
-                    <td>{{ leave.student.name }}</td>
+                    <td>{{ leave.student.full_name }}</td>
                     <td>{{ leave.from_date }}</td>
                     <td>{{ leave.to_date }}</td>
                     <td>
