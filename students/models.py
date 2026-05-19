@@ -27,14 +27,13 @@ class Student(models.Model):
         return self.full_name
     
 class Rector(models.Model):
-    name = models.CharField(max_length=100)
-    username = models.CharField(max_length=50, unique=True)
+    username = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
 
     hostel_block = models.CharField(max_length=50)
 
     def __str__(self):
-        return self.name
+        return self.username
 
 class Proctor(models.Model):
     username = models.CharField(max_length=50)
@@ -87,3 +86,16 @@ class Leave(models.Model):
 
     def __str__(self):
         return f"{self.student.full_name} - {self.status}"
+
+
+class ParentNotification(models.Model):
+    leave = models.OneToOneField(Leave, on_delete=models.CASCADE, related_name="parent_notification")
+    parent_name = models.CharField(max_length=100)
+    parent_phone = models.CharField(max_length=15)
+    message = models.TextField()
+    gate_pass_status = models.CharField(max_length=30, default="Generated")
+    sent_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, default="Sent")
+
+    def __str__(self):
+        return f"{self.parent_name} - {self.gate_pass_status}"

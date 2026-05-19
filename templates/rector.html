@@ -237,6 +237,7 @@
     <!-- Navbar -->
     <div class="navbar">
         <h2>College Leave Management</h2>
+        <div class="profile">Welcome, {{ rector_name }} | <a href="{% url 'logout' %}">Logout</a></div>
         <div class="profile">Welcome, {{ request.session.rector_username  }} | <a href="{% url 'logout' %}">Logout</a></div>
     </div>
 
@@ -280,6 +281,17 @@
                 </div>
             </div>
 
+            <!-- Student Verification Table -->
+            <div class="section-card">
+                <h3>Student Account Verification</h3>
+                <table>
+                    <tr>
+                        <th>Full Name</th>
+                        <th>Enrollment No.</th>
+                        <th>Room</th>
+                        <th>Action</th>
+                    </tr>
+
             <div class="section-card">
                 <h3>Unverified Students</h3>
                 <table>
@@ -293,6 +305,13 @@
                     <tr>
                         <td>{{ student.full_name }}</td>
                         <td>{{ student.enrollment_no }}</td>
+                        <td>{{ student.room_number }}</td>
+                        <td>
+                            <form method="POST" action="{% url 'verify_student' student.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn approve">Verify</button>
+                            </form>
+
                         <td>{{ student.hostel_block }}</td>
                         <td>
                             <a href="{% url 'verify_student' student.id %}">
@@ -302,6 +321,7 @@
                     </tr>
                     {% empty %}
                     <tr>
+                        <td colspan="4" style="text-align: center; padding: 20px; color: #64748b;">No Pending Verifications</td>
                         <td colspan="4">No students to verify</td>
                     </tr>
                     {% endfor %}
@@ -374,7 +394,7 @@
                     </tr>
                     {% endfor %}
                 </table>
-            </div> <!-- End default-dashboard-content -->
+            </div>
             
             <!-- Iframe Container -->
             <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 8px;"></iframe>
