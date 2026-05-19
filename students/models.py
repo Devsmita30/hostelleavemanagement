@@ -10,6 +10,8 @@ class Student(models.Model):
 
     hostel_block = models.CharField(max_length=50)
     room_number = models.IntegerField()
+    department = models.CharField(max_length=50)
+    semester = models.CharField(max_length=20)
 
     '''student_mobile = models.CharField(max_length=10)
 
@@ -37,7 +39,7 @@ class Proctor(models.Model):
     username = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
     department = models.CharField(max_length=50)
-    semester = models.IntegerField()
+    semester = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.username
@@ -46,6 +48,7 @@ class HOD(models.Model):
     username = models.CharField(max_length=50)
     password = models.CharField(max_length=50)
     department = models.CharField(max_length=50)
+    semester = models.CharField(max_length=20, blank=True, null=True)
 
     def __str__(self):
         return self.username
