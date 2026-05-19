@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Q
-from .models import Student, Leave, Rector, Proctor, HOD
+
+from .models import Student, Leave, Rector, ParentNotification, Proctor, HOD
 
 
 # ------------- HOME ------------
@@ -9,9 +10,22 @@ def home(request):
     return render(request, 'login.html')
 
 
+def get_logged_in_student(request):
+    student_id = request.session.get('student_id')
+
+    if not student_id:
+        return None
+
+    try:
+        return Student.objects.get(id=student_id)
+    except Student.DoesNotExist:
+        return None
+
+
 # ------------ STUDENT SIGNUP -------------
 def student(request):
-    return render(request, "student.html")
+    return redirect("student_dashboard")
+
 
 def student_signup(request):
     if request.method == "POST":
@@ -21,8 +35,11 @@ def student_signup(request):
             email=request.POST.get('email'),
             hostel_block=request.POST.get('hostel_block'),
             room_number=request.POST.get('room_number'),
+            department=request.POST.get('department', ''),
+            semester=request.POST.get('semester', ''),
             password=request.POST.get('password')
         )
+
         return redirect('student_login')
 
     return render(request, "student_signup.html")
@@ -30,12 +47,16 @@ def student_signup(request):
 
 # ------------- STUDENT LOGIN ------------
 def student_login(request):
+
     if request.method == "POST":
+
         enrollment_no = request.POST.get('enrollment_no')
         password = request.POST.get('password')
 
         try:
-            student = Student.objects.get(enrollment_no=enrollment_no)
+            student = Student.objects.get(
+                enrollment_no=enrollment_no
+            )
 
             if student.password != password:
                 messages.error(request, "Incorrect password")
@@ -45,8 +66,8 @@ def student_login(request):
                 messages.error(request, "Wait for rector verification")
                 return redirect("student_login")
 
-            # SESSION
             request.session['student_id'] = student.id
+            request.session['student_enrollment'] = student.enrollment_no
             request.session['student_name'] = student.full_name
 
             return redirect("student_dashboard")
@@ -59,18 +80,34 @@ def student_login(request):
 
 # ----------------- STUDENT DASHBOARD -------------
 def student_dashboard(request):
-    if not request.session.get('student_id'):
+
+    student = get_logged_in_student(request)
+
+    if not student:
         return redirect('student_login')
 
-    return render(request, "student.html")
+    leaves = Leave.objects.filter(
+        student=student
+    ).order_by('-id')
+
+    return render(request, "student.html", {
+        "student": student,
+        "pending_count": leaves.filter(status="Pending").count(),
+        "approved_count": leaves.filter(status="Approved").count(),
+        "rejected_count": leaves.filter(status="Rejected").count(),
+        "recent_leaves": leaves[:5],
+    })
 
 
 # ---------------- APPLY LEAVE --------------
 def apply_leave(request):
-    if request.method == "POST":
 
-        student_id = request.session.get('student_id')
-        student = Student.objects.get(id=student_id)
+    student = get_logged_in_student(request)
+
+    if not student:
+        return redirect('student_login')
+
+    if request.method == "POST":
 
         Leave.objects.create(
             student=student,
@@ -90,56 +127,66 @@ def apply_leave(request):
             reason=request.POST.get('reason')
         )
 
-        return redirect("student_dashboard")
+        messages.success(request, "Leave request submitted successfully.")
+        return redirect("track_leave")
 
-    return render(request, "apply_leave.html")
+    return render(request, "apply_leave.html", {
+        "student": student
+    })
 
+
+# ---------------- LEAVE HISTORY ----------------
 def leave_history(request):
-    enrollment = request.session.get('student_enrollment')
 
-    if not enrollment:
+    student = get_logged_in_student(request)
+
+    if not student:
         return redirect('student_login')
 
-    try:
-        student = Student.objects.get(enrollment_no=enrollment)
-    except Student.DoesNotExist:
-        return redirect('student_login')
+    history = Leave.objects.filter(
+        student=student
+    ).exclude(status="Pending").order_by('-id')
 
-    history = Leave.objects.filter(student=student).exclude(status="Pending")
+    return render(request, "leave_history.html", {
+        "history": history
+    })
 
-    return render(request, "leave_history.html", {"history": history})
 
-
-# ------------- TRACK LEAVE -------------------
+# ---------------- TRACK LEAVE ----------------
 def track_leave(request):
-    enrollment = request.session.get('student_enrollment')
 
-    if not enrollment:
+    student = get_logged_in_student(request)
+
+    if not student:
         return redirect('student_login')
 
-    try:
-        student = Student.objects.get(enrollment_no=enrollment)
-    except Student.DoesNotExist:
-        return redirect('student_login')
+    leaves = Leave.objects.filter(
+        student=student
+    ).order_by('-id')
 
-    leaves = Leave.objects.filter(student=student)
+    return render(request, "track_leave.html", {
+        "leaves": leaves
+    })
 
-    return render(request, "track_leave.html", {"leaves": leaves})
 
-
-# ------------ RECTOR DASHBOARD --------------
+# ------------ RECTOR LOGIN --------------
 def rector_login(request):
+
     if request.method == "POST":
+
         username = request.POST.get('username')
         password = request.POST.get('password')
 
         try:
-            rector = Rector.objects.get(username=username, password=password)
+            rector = Rector.objects.get(
+                username=username,
+                password=password
+            )
 
             request.session['role'] = 'rector'
             request.session['rector_id'] = rector.id
+            request.session['rector_name'] = rector.username
             request.session['hostel_block'] = rector.hostel_block
-            request.session['rector_username'] = rector.username
 
             return redirect("rector_dashboard")
 
@@ -148,82 +195,151 @@ def rector_login(request):
 
     return render(request, "rector_login.html")
 
+
+# ------------ RECTOR DASHBOARD --------------
 def rector_dashboard(request):
 
     if request.session.get('role') != 'rector':
         return redirect("rector_login")
 
-    #only students of one block 
     hostel = request.session.get('hostel_block')
 
-    # Students to verify
+    # Students awaiting verification
     unverified_students = Student.objects.filter(
         verified=False,
-        hostel_block__icontains=hostel
+        hostel_block=hostel
     )
 
-    # Leaves for this rector block
-    all_leaves = Leave.objects.filter(student__hostel_block=hostel)
+    # All leaves for this hostel
+    all_leaves = Leave.objects.filter(
+        student__hostel_block=hostel
+    )
 
+    # Pending approvals
     pending_final = all_leaves.filter(
-        Q(proctor_status="Approved", hod_status="Approved") |  # fully approved → final decision
-        Q(proctor_status="Rejected") |                        # rejected by proctor
-        Q(hod_status="Rejected"),                             # rejected by hod
+        rector_status="Pending"
+    )
+
+    # History
+    history = all_leaves.exclude(
         rector_status="Pending"
     )
 
     # Stats
     total = all_leaves.count()
-    approved = all_leaves.filter(rector_status="Approved").count()
-    rejected = all_leaves.filter(rector_status="Rejected").count()
+    approved = all_leaves.filter(
+        rector_status="Approved"
+    ).count()
+
+    rejected = all_leaves.filter(
+        rector_status="Rejected"
+    ).count()
+
     pending = pending_final.count()
 
-    # Pending approvals
-    pending_final = all_leaves.filter(rector_status="Pending")
-
-    # History
-    history = all_leaves.exclude(rector_status="Pending")
-
     return render(request, "rector.html", {
+
         "unverified_students": unverified_students,
+
+        "pending_final": pending_final,
+
         "total": total,
         "pending": pending,
         "approved": approved,
         "rejected": rejected,
-        "pending_final": pending_final,
-        "history": history
+
+        "history": history,
+
+        "rector_name": request.session.get(
+            'rector_name',
+            'Rector'
+        ),
     })
 
 
 # --------------- APPROVE / REJECT ------------
+def send_parent_gate_pass_notification(leave):
+
+    gate_pass_status = "Generated"
+
+    message = (
+        f"Dear {leave.parent_name},\n\n"
+        f"Your ward's leave request has been approved and the gate pass is {gate_pass_status}.\n\n"
+        f"Student Details:\n"
+        f"Name: {leave.student.full_name}\n"
+        f"Enrollment No: {leave.student.enrollment_no}\n"
+        f"Hostel: {leave.hostel}\n"
+        f"Room: {leave.room}\n"
+        f"Student Contact: {leave.student_contact}\n"
+        f"Student Email: {leave.student_email}\n\n"
+        f"Leave Information:\n"
+        f"From: {leave.from_date}\n"
+        f"To: {leave.to_date}\n"
+        f"Travel Mode: {leave.travel_mode}\n"
+        f"Leave Address: {leave.leave_address}, {leave.city_state_pin}\n"
+        f"Reason: {leave.reason}\n\n"
+        f"Gate Pass Status: {gate_pass_status}"
+    )
+
+    ParentNotification.objects.update_or_create(
+        leave=leave,
+        defaults={
+            "parent_name": leave.parent_name,
+            "parent_phone": leave.parent_phone,
+            "message": message,
+            "gate_pass_status": gate_pass_status,
+            "status": "Sent",
+        },
+    )
+
+
 def rector_approve(request, id):
+
     leave = Leave.objects.get(id=id)
+
     leave.rector_status = 'Approved'
-    leave.status='Approved'
+    leave.status = 'Approved'
+
     leave.save()
+
+    send_parent_gate_pass_notification(leave)
+
     return redirect('rector_dashboard')
 
 
 def rector_reject(request, id):
+
     leave = Leave.objects.get(id=id)
+
+    leave.rector_status = 'Rejected'
     leave.status = 'Rejected'
-    leave.status='Rejected'
+
     leave.save()
+
     return redirect('rector_dashboard')
+
 
 # ------------- LOGOUT --------------
 def logout_view(request):
+
     request.session.flush()
+
     return redirect('login')
 
-#------------- proctor -----------
+
+# ------------- PROCTOR LOGIN -------------
 def proctor_login(request):
+
     if request.method == "POST":
+
         username = request.POST.get('username')
         password = request.POST.get('password')
 
         try:
-            proctor = Proctor.objects.get(username=username, password=password)
+            proctor = Proctor.objects.get(
+                username=username,
+                password=password
+            )
 
             request.session['role'] = 'proctor'
             request.session['proctor_id'] = proctor.id
@@ -233,59 +349,73 @@ def proctor_login(request):
 
             return redirect("proctor_dashboard")
 
-        except Rector.DoesNotExist:
+        except Proctor.DoesNotExist:
             messages.error(request, "Invalid credentials")
 
     return render(request, "proctor_login.html")
 
+
+# ------------- PROCTOR DASHBOARD -------------
 def proctor_dashboard(request):
 
     if request.session.get('role') != 'proctor':
         return redirect("proctor_login")
-    
+
     department = request.session.get('department')
     semester = request.session.get('semester')
 
     leaves = Leave.objects.filter(
         proctor_status="Pending",
+        status="Pending",
         student__department=department,
         student__semester=semester
     )
 
-    history_leaves = Leave.objects.filter(
-        rector_status="Approved"
-    ).exclude(proctor_status="Pending")
+    history_leaves = Leave.objects.exclude(
+        proctor_status="Pending"
+    )
 
     return render(request, "proctor.html", {
         "pending_leaves": leaves,
         "history_leaves": history_leaves
     })
 
+
 def proctor_approve(request, id):
+
     leave = Leave.objects.get(id=id)
+
     leave.proctor_status = "Approved"
+
     leave.save()
+
     return redirect("proctor_dashboard")
 
 
 def proctor_reject(request, id):
+
     leave = Leave.objects.get(id=id)
+
     leave.proctor_status = "Rejected"
-    leave.final_status = "Rejected"
+
     leave.save()
+
     return redirect("proctor_dashboard")
 
-# ------------ Hod --------------
-def hod_login(request):
-    return render(request, "hod_login.html")
 
+# ------------ HOD LOGIN --------------
 def hod_login(request):
+
     if request.method == "POST":
+
         username = request.POST.get('username')
         password = request.POST.get('password')
 
         try:
-            hod = HOD.objects.get(username=username, password=password)
+            hod = HOD.objects.get(
+                username=username,
+                password=password
+            )
 
             request.session['role'] = 'hod'
             request.session['hod_id'] = hod.id
@@ -295,23 +425,25 @@ def hod_login(request):
 
             return redirect("hod_dashboard")
 
-        except Rector.DoesNotExist:
+        except HOD.DoesNotExist:
             messages.error(request, "Invalid credentials")
 
     return render(request, "hod_login.html")
 
+
+# ------------ HOD DASHBOARD --------------
 def hod_dashboard(request):
 
     if request.session.get('role') != 'hod':
         return redirect("hod_login")
 
     leaves = Leave.objects.filter(
-        proctor_status="Approved",
+        proctor_status="Rejected",
         hod_status="Pending"
     )
 
     history_leaves = Leave.objects.filter(
-        proctor_status="Approved"
+        proctor_status="Rejected"
     ).exclude(hod_status="Pending")
 
     return render(request, "hod.html", {
@@ -319,23 +451,38 @@ def hod_dashboard(request):
         "history_leaves": history_leaves
     })
 
+
 def hod_approve(request, id):
+
     leave = Leave.objects.get(id=id)
+
     leave.hod_status = "Approved"
+
     leave.save()
+
+    send_parent_gate_pass_notification(leave)
+
     return redirect("hod_dashboard")
 
 
 def hod_reject(request, id):
+
     leave = Leave.objects.get(id=id)
+
     leave.hod_status = "Rejected"
+
     leave.save()
+
     return redirect("hod_dashboard")
 
-#-----------verification------------
-def verify_student(request, id):
-    student = Student.objects.get(id=id)
-    student.verified = True
-    student.save()
-    return redirect('rector')
 
+# ----------- STUDENT VERIFICATION ------------
+def verify_student(request, id):
+
+    student = Student.objects.get(id=id)
+
+    student.verified = True
+
+    student.save()
+
+    return redirect('rector_dashboard')
