@@ -42,6 +42,8 @@ urlpatterns = [
     path('proctor/', views.proctor_dashboard, name='proctor'),
     path('proctor_dashboard/', views.proctor_dashboard, name='proctor_dashboard'),
     path('proctor_login/', views.proctor_login, name='proctor_login'),
+    path('proctor_approve/<int:id>',views.proctor_approve,name='proctor_approve'),
+    path('proctor_reject/<int:id>',views.proctor_reject,name='proctor_reject'),
 
     #hod
     path('hod_login/', views.hod_login, name='hod_login'),

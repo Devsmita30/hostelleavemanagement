@@ -6,129 +6,232 @@
     <title>Proctor Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Modern Typography & Icons -->
+    <link href="https://googleapis.com" rel="stylesheet">
+    <link rel="stylesheet" href="https://cloudflare.com">
+
     <style>
+        :root {
+            --bg-main: #f8fafc;
+            --sidebar-bg: #0f172a;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --border: #e2e8f0;
+            
+            /* Modernized Alert Colors */
+            --success: #16a34a;
+            --success-light: #f0fdf4;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --info: #2563eb;
+            --info-light: #eff6ff;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
         }
 
         body {
-            background-color: #f1f5f9;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
+        /* Top Navbar */
         .navbar {
-            height: 60px;
+            height: 65px;
             background: #0f172a;
             color: white;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 0 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 10;
         }
 
         .navbar h2 {
-            font-size: 20px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
+        .navbar div {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #cbd5e1;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar div a {
+            color: #f87171; /* Modern Red Accent for Navbar Logout */
+            text-decoration: none;
+            margin-left: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .navbar div a:hover {
+            text-decoration: underline;
+        }
+
+        /* Layout Layout */
         .container {
             display: flex;
+            flex: 1;
+            overflow: hidden;
         }
 
+        /* Sidebar Navigation */
         .sidebar {
-            width: 220px;
+            width: 250px;
             background: #1e293b;
-            height: calc(100vh - 60px);
-            padding-top: 20px;
+            height: 100%;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
 
         .sidebar a {
-            display: block;
-            padding: 12px 20px;
-            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #94a3b8;
             text-decoration: none;
-            transition: 0.3s;
+            border-radius: 8px;
+            font-size: 0.925rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
         }
 
         .sidebar a:hover {
-            background: #334155;
+            background: rgba(255, 255, 255, 0.06);
             color: white;
         }
 
         .active {
-            background: #2563eb;
+            background: #2563eb !important;
             color: white !important;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
         }
 
+        /* Content Context Area */
         .main-content {
             flex: 1;
-            padding: 20px;
+            padding: 40px;
+            overflow-y: auto;
         }
 
+        /* Cards Sections */
         .card {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
+            padding: 28px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02);
             margin-bottom: 30px;
         }
 
         h3 {
-            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-main);
         }
 
+        /* Data Tables styling */
         table {
             width: 100%;
             border-collapse: collapse;
+            overflow: hidden;
         }
 
         th, td {
-            padding: 12px;
+            padding: 16px 20px;
             text-align: left;
+            font-size: 0.925rem;
         }
 
         th {
-            background: #0f172a;
-            color: white;
-        }
-
-        tr:nth-child(even) {
             background: #f8fafc;
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border);
         }
 
+        td {
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        /* Interactive UI Buttons */
         .btn {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
         .approve {
-            background: #16a34a;
+            background: var(--success);
             color: white;
         }
 
-        .forward {
-            background: #2563eb;
-            color: white;
+        .approve:hover {
+            background: #15803d;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
         }
 
+        /* Status Badge Items */
         .status-badge {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            color: white;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 50px;
+            font-size: 0.775rem;
+            font-weight: 600;
+            text-transform: capitalize;
         }
 
-        .approved { background: #16a34a; }
-        .forwarded { background: #2563eb; }
-        .rejected { background: #dc2626; }
+        .approved { background: var(--success-light); color: var(--success); }
+        .forwarded { background: var(--info-light); color: var(--info); }
+        .rejected { background: var(--danger-light); color: var(--danger); }
 
+        /* Media Responsive Limits */
         @media(max-width: 768px) {
             .sidebar {
                 display: none;
+            }
+            .main-content {
+                padding: 24px;
             }
         }
     </style>
@@ -144,10 +247,10 @@
 
     <!-- Sidebar -->
     <div class="sidebar">
-        <a href="#" class="active" data-target="dashboard">Dashboard</a>
-        <a href="#" data-target="frame">Pending Requests</a>
-        <a href="#" data-target="frame">History</a>
-        <a href="{% url 'logout' %}">Logout</a>
+        <a href="#" class="active" data-target="dashboard"><i class="fa-solid fa-chart-pie" style="margin-right: 12px; font-size: 1rem;"></i>Dashboard</a>
+        <a href="#" data-target="frame"><i class="fa-solid fa-hourglass-half" style="margin-right: 12px; font-size: 1rem;"></i>Pending Requests</a>
+        <a href="#" data-target="frame"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 12px; font-size: 1rem;"></i>History</a>
+        <a href="{% url 'logout' %}" style="margin-top: auto; color: #f87171;"><i class="fa-solid fa-right-from-bracket" style="margin-right: 12px; font-size: 1rem;"></i>Logout</a>
     </div>
 
     <!-- Main Content -->
@@ -160,41 +263,42 @@
             <h3>Pending Leave Requests</h3>
 
             <table>
-                <tr>
-                    <th>Student</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Reason</th>
-                    <th>Action</th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Reason</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in pending_leaves %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ leave.student.name }}</td>
+                        <td>{{ leave.from_date }}</td>
+                        <td>{{ leave.to_date }}</td>
+                        <td>{{ leave.reason }}</td>
+                        <td>
+                            <!-- Forward -->
+                            <form method="POST" action="{% url 'proctor_approve' leave.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn approve" style="margin-right: 4px;">Forward to HOD</button>
+                            </form>
 
-                {% for leave in pending_leaves %}
-                <tr>
-                    <td>{{ leave.student.name }}</td>
-                    <td>{{ leave.from_date }}</td>
-                    <td>{{ leave.to_date }}</td>
-                    <td>{{ leave.reason }}</td>
-                    <td>
-
-                        <!-- Forward -->
-                        <form method="POST" action="{% url 'proctor_approve' leave.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn approve">Forward to HOD</button>
-                        </form>
-
-                        <!-- Reject -->
-                        <form method="POST" action="{% url 'proctor_reject' leave.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn" style="background:#dc2626; color:white;">Reject</button>
-                        </form>
-
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5">No Pending Requests</td>
-                </tr>
-                {% endfor %}
+                            <!-- Reject -->
+                            <form method="POST" action="{% url 'proctor_reject' leave.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn" style="background: var(--danger); color:white; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#b91c1c'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(220, 38, 38, 0.2)'" onmouseout="this.style.background='var(--danger)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.05)'">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No Pending Requests</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
 
@@ -203,34 +307,39 @@
             <h3>Recent History</h3>
 
             <table>
-                <tr>
-                    <th>Student</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Status</th>
-                </tr>
-
-                {% for leave in history_leaves %}
-                <tr>
-                    <td>{{ leave.student.name }}</td>
-                    <td>{{ leave.from_date }}</td>
-                    <td>{{ leave.to_date }}</td>
-                    <td>
-                        <span class="status-badge {{ leave.status|lower }}">
-                            {{ leave.status }}
-                        </span>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4">No History Found</td>
-                </tr>
-                {% endfor %}
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in history_leaves %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ leave.student.name }}</td>
+                        <td>{{ leave.from_date }}</td>
+                        <td>{{ leave.to_date }}</td>
+                        <td>
+                            <span class="status-badge {{ leave.status|lower }}">
+                                {{ leave.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No History Found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
+        </div> 
+        
         </div> <!-- End default-dashboard-content -->
         
         <!-- Iframe Container -->
-        <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 8px;"></iframe>
+        <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border: 1px solid var(--border);"></iframe>
 
     </div>
 </div>
