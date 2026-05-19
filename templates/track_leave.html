@@ -62,7 +62,6 @@ tr:nth-child(even){
     font-size:12px;
 }
 
-/* Status Colors */
 .pending{background:#f59e0b;}
 .approved{background:#16a34a;}
 .rejected{background:#dc2626;}
@@ -72,6 +71,14 @@ tr:nth-child(even){
     padding:20px;
     color:#555;
 }
+
+.message{
+    margin-bottom:15px;
+    padding:10px;
+    border-radius:6px;
+    background:#dcfce7;
+    color:#166534;
+}
 </style>
 </head>
 
@@ -79,7 +86,7 @@ tr:nth-child(even){
 
 <div class="navbar">
     <h3>Track Leave</h3>
-    <a href="{% url 'student' %}" target="_parent" style="color:white;text-decoration:none;">⬅ Back</a>
+    <a href="{% url 'student_dashboard' %}" target="_parent" style="color:white;text-decoration:none;">Back</a>
 </div>
 
 <div class="container">
@@ -87,6 +94,12 @@ tr:nth-child(even){
 <div class="card">
 
 <h2>Your Leave Requests</h2>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="message">{{ message }}</div>
+    {% endfor %}
+{% endif %}
 
 <table>
 <tr>
@@ -124,8 +137,8 @@ tr:nth-child(even){
     </td>
 
     <td>
-        <span class="badge {{ leave.final_status|lower }}">
-            {{ leave.final_status }}
+        <span class="badge {{ leave.status|lower }}">
+            {{ leave.status }}
         </span>
     </td>
 </tr>

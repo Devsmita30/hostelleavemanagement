@@ -59,7 +59,7 @@
     </div>
 
     <!-- Form Submit -->
-    <form method="POST" class="needs-validation" enctype="multipart/form-data" novalidate target="_parent">
+    <form method="POST" class="needs-validation" enctype="multipart/form-data" novalidate>
         {% csrf_token %}
 
     <!-- ================= STUDENT DETAILS ================= -->
@@ -70,32 +70,22 @@
 
             <div class="col-md-6 mb-3">
                 <label>Full Name *</label>
-                <input type="text" name="name" class="form-control" required>
+                <input type="text" name="name" class="form-control" value="{{ student.full_name }}" readonly required>
             </div>
 
             <div class="col-md-6 mb-3">
                 <label>Enrollment Number *</label>
-                <input type="text" name="enrollment" class="form-control" required>
+                <input type="text" name="enrollment" class="form-control" value="{{ student.enrollment_no }}" readonly required>
             </div>
 
             <div class="col-md-6 mb-3">
                 <label>Hostel Name *</label>
-                <select name="hostel" class="form-select" required>
-                    <option disabled selected>-- Choose Hostel --</option>
-                    <option>Hostel Block A</option>
-                    <option>Hostel Block B</option>
-                    <option>Hostel Block C</option>
-                    <option>Hostel Block D</option>
-                    <option>Hostel Block E</option>
-                    <option>Hostel Block F</option>
-                    <option>Hostel Block G</option>
-                    <option>Hostel Block H</option>
-                </select>
+                <input type="text" name="hostel" class="form-control" value="{{ student.hostel_block }}" readonly required>
             </div>
 
             <div class="col-md-6 mb-3">
                 <label>Room Number *</label>
-                <input type="text" name="room" class="form-control" required>
+                <input type="text" name="room" class="form-control" value="{{ student.room_number }}" readonly required>
             </div>
 
             <div class="col-md-6 mb-3">
@@ -105,7 +95,7 @@
 
             <div class="col-md-6 mb-3">
                 <label>Student Email *</label>
-                <input type="email" name="student_email" class="form-control" required>
+                <input type="email" name="student_email" class="form-control" value="{{ student.email }}" readonly required>
             </div>
 
         </div>

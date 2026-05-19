@@ -38,6 +38,16 @@
             cursor: pointer;
         }
 
+        .navbar .profile a {
+            color: white;
+            margin-left: 8px;
+            text-decoration: none;
+        }
+
+        .navbar .profile a:hover {
+            text-decoration: underline;
+        }
+
         /* Layout */
         .container {
             display: flex;
@@ -73,6 +83,8 @@
         .main-content {
             flex: 1;
             padding: 20px;
+            height: calc(100vh - 60px);
+            overflow-y: auto;
         }
 
         /* Cards */
@@ -139,6 +151,21 @@
         .status.approved { background: #10b981; }
         .status.rejected { background: #ef4444; }
 
+        .empty {
+            color: #64748b;
+            text-align: center;
+        }
+
+        #dashboard_frame {
+            width: 100%;
+            height: calc(100vh - 100px);
+            min-height: 560px;
+            display: none;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .sidebar {
@@ -156,7 +183,7 @@
     <!-- Navbar -->
     <div class="navbar">
         <h2>College Leave Management</h2>
-        <div class="profile">Student | Logout</div>
+        <div class="profile">{{ student.full_name }} | <a href="{% url 'logout' %}">Logout</a></div>
     </div>
 
     <div class="container">
@@ -182,17 +209,17 @@
             <div class="card-container">
                 <div class="card pending">
                     <h3>Pending Leaves</h3>
-                    <p>2</p>
+                    <p>{{ pending_count }}</p>
                 </div>
 
                 <div class="card approved">
                     <h3>Approved Leaves</h3>
-                    <p>5</p>
+                    <p>{{ approved_count }}</p>
                 </div>
 
                 <div class="card rejected">
                     <h3>Rejected Leaves</h3>
-                    <p>1</p>
+                    <p>{{ rejected_count }}</p>
                 </div>
             </div>
 
@@ -208,56 +235,54 @@
                     <th>Status</th>
                 </tr>
 
+                {% for leave in recent_leaves %}
                 <tr>
-                    <td>#L001</td>
-                    <td>10 Feb 2026</td>
-                    <td>12 Feb 2026</td>
-                    <td><span class="status approved">Approved</span></td>
+                    <td>#L{{ leave.id }}</td>
+                    <td>{{ leave.from_date }}</td>
+                    <td>{{ leave.to_date }}</td>
+                    <td><span class="status {{ leave.status|lower }}">{{ leave.status }}</span></td>
                 </tr>
-
+                {% empty %}
                 <tr>
-                    <td>#L002</td>
-                    <td>15 Feb 2026</td>
-                    <td>16 Feb 2026</td>
-                    <td><span class="status pending">Pending</span></td>
+                    <td colspan="4" class="empty">No leave applications yet</td>
                 </tr>
-
-                <tr>
-                    <td>#L003</td>
-                    <td>20 Jan 2026</td>
-                    <td>21 Jan 2026</td>
-                    <td><span class="status rejected">Rejected</span></td>
-                </tr>
+                {% endfor %}
 
             </table>
 
             </div> <!-- End default-dashboard-content -->
             
             <!-- Iframe Container -->
-            <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 8px;"></iframe>
+            <iframe name="dashboard_frame" id="dashboard_frame"></iframe>
 
         </div>
 
     </div>
 
     <script>
+        const dashboardContent = document.getElementById('default-dashboard-content');
+        const dashboardFrame = document.getElementById('dashboard_frame');
+
         document.querySelectorAll('.sidebar a').forEach(link => {
             link.addEventListener('click', function(e) {
-                // Ignore logout links
-                if (this.getAttribute('href').includes('logout')) return;
+                const href = this.getAttribute('href') || '';
 
-                // Handle dashboard toggle vs frame toggle
+                if (href.includes('logout')) return;
+
                 if (this.getAttribute('data-target') === 'frame') {
-                    document.getElementById('default-dashboard-content').style.display = 'none';
-                    document.getElementById('dashboard_frame').style.display = 'block';
+                    e.preventDefault();
+                    dashboardContent.style.display = 'none';
+                    dashboardFrame.style.display = 'block';
+                    dashboardFrame.src = href;
                     
                     document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
                     this.classList.add('active');
                 } 
                 else if (this.getAttribute('data-target') === 'dashboard') {
                     e.preventDefault();
-                    document.getElementById('default-dashboard-content').style.display = 'block';
-                    document.getElementById('dashboard_frame').style.display = 'none';
+                    dashboardContent.style.display = 'block';
+                    dashboardFrame.style.display = 'none';
+                    dashboardFrame.removeAttribute('src');
 
                     document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
                     this.classList.add('active');
