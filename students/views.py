@@ -252,8 +252,13 @@ def proctor_dashboard(request):
         student__semester=semester
     )
 
+    history_leaves = Leave.objects.filter(
+        rector_status="Approved"
+    ).exclude(proctor_status="Pending")
+
     return render(request, "proctor.html", {
-        "leaves": leaves
+        "pending_leaves": leaves,
+        "history_leaves": history_leaves
     })
 
 def proctor_approve(request, id):
@@ -305,8 +310,13 @@ def hod_dashboard(request):
         hod_status="Pending"
     )
 
+    history_leaves = Leave.objects.filter(
+        proctor_status="Approved"
+    ).exclude(hod_status="Pending")
+
     return render(request, "hod.html", {
-        "leaves": leaves
+        "escalated_leaves": leaves,
+        "history_leaves": history_leaves
     })
 
 def hod_approve(request, id):
