@@ -26,7 +26,7 @@ urlpatterns = [
     # Student
     path('student_signup/', views.student_signup, name='student_signup'),
     path('student_login/', views.student_login, name='student_login'),
-    path('student/', views.student, name='student_dashboard'),
+    path('student/', views.student, name='student'),
     path('apply_leave/', views.apply_leave, name='apply_leave'),
     path('track_leave/', views.track_leave, name='track_leave'),
     path('leave_history/', views.leave_history, name='leave_history'),

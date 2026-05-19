@@ -50,6 +50,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Allow dashboard pages to load same-site content in the right-side iframe panel.
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 ROOT_URLCONF = 'leaveform.urls'
 
 TEMPLATES = [
@@ -83,7 +86,7 @@ WSGI_APPLICATION = 'leaveform.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
-        'NAME': 'leave_management',
+        'NAME': 'hostel_leave_db',
         'USER': 'root',
         'PASSWORD': '3005',
         'HOST': 'localhost',
@@ -143,7 +146,7 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_HTTPONLY = True
 
 # Transmits cookies ONLY over encrypted HTTPS connections
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG
 
 # Protects against Cross-Site Request Forgery (CSRF) attacks
 SESSION_COOKIE_SAMESITE = 'Lax'
