@@ -1,0 +1,602 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Official Hostel Gate Pass - #L{{ leave.id }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #b45309;
+            --accent-light: #fef3c7;
+            --success: #15803d;
+            --success-bg: #dcfce7;
+            --gray-light: #f8fafc;
+            --gray-border: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        .actions-wrapper {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-action:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-close {
+            background: #ef4444;
+        }
+
+        .btn-close:hover {
+            background: #dc2626;
+        }
+
+        /* Gate Pass Card Container */
+        .pass-container {
+            width: 100%;
+            max-width: 800px;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            border: 1px solid var(--gray-border);
+            position: relative;
+        }
+
+        /* Top Header Strip */
+        .pass-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 5px solid var(--accent);
+            position: relative;
+        }
+
+        .pass-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.03) 10%, transparent 10.5%);
+            background-size: 15px 15px;
+        }
+
+        .college-info h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .college-info p {
+            font-size: 13px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+        }
+
+        .pass-badge {
+            background: var(--accent-light);
+            color: var(--accent);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid rgba(180, 83, 9, 0.2);
+        }
+
+        /* Status Banner */
+        .status-banner {
+            background-color: var(--success-bg);
+            color: var(--success);
+            padding: 12px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 14px;
+            border-bottom: 1px solid #bbf7d0;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Pass Content */
+        .pass-body {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: 1fr 200px;
+            gap: 40px;
+            background: radial-gradient(circle at 80% 20%, rgba(248, 250, 252, 0.8) 0%, #ffffff 100%);
+            position: relative;
+        }
+
+        /* Decorative Watermark Stamp */
+        .watermark-stamp {
+            position: absolute;
+            bottom: 30px;
+            right: 40px;
+            width: 140px;
+            height: 140px;
+            border: 3px double rgba(21, 128, 61, 0.15);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transform: rotate(-12deg);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .watermark-stamp span {
+            font-size: 10px;
+            color: rgba(21, 128, 61, 0.25);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .watermark-stamp .stamp-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            font-weight: 700;
+            color: rgba(21, 128, 61, 0.3);
+        }
+
+        /* Info Layout */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .info-item.full-width {
+            grid-column: span 2;
+        }
+
+        /* QR Code & Sidebar block */
+        .pass-sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 20px;
+            border-left: 1px dashed var(--gray-border);
+            padding-left: 40px;
+        }
+
+        .qr-card {
+            padding: 12px;
+            background: #ffffff;
+            border: 1px solid var(--gray-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qr-code {
+            width: 140px;
+            height: 140px;
+            background: repeating-conic-gradient(from 45deg, #0f172a 0% 25%, #ffffff 0% 50%) 50% / 20px 20px;
+            border: 4px solid white;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* Styling the QR Code to look extremely real using absolute overlays */
+        .qr-code::before {
+            content: '';
+            position: absolute;
+            top: 20%; left: 20%; right: 20%; bottom: 20%;
+            background: #ffffff;
+            border: 4px solid #0f172a;
+        }
+
+        .qr-code::after {
+            content: '';
+            position: absolute;
+            top: 40%; left: 40%; right: 40%; bottom: 40%;
+            background: #0f172a;
+        }
+
+        .qr-text {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .pass-meta {
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .pass-meta p {
+            margin-bottom: 4px;
+        }
+
+        /* Pass Footer Signatures */
+        .pass-footer {
+            background-color: var(--gray-light);
+            border-top: 1px solid var(--gray-border);
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .signature-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .signature-line {
+            width: 140px;
+            height: 1px;
+            background-color: var(--text-muted);
+            margin-top: 15px;
+        }
+
+        .signature-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Pulsing Dot animation */
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 0.5; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(0.95); opacity: 0.5; }
+        }
+
+        /* PRINT STYLE RULES OPTIMIZED FOR A4 */
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+            }
+
+            .actions-wrapper {
+                display: none !important;
+            }
+
+            .pass-container {
+                box-shadow: none !important;
+                border: 1px solid #000000 !important;
+                border-radius: 0 !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                margin: 0 !important;
+                position: static !important;
+            }
+
+            .pass-header {
+                background: white !important;
+                color: black !important;
+                border-bottom: 3px solid black !important;
+                padding: 20px !important;
+            }
+
+            .college-info h1 {
+                color: black !important;
+            }
+
+            .college-info p {
+                color: black !important;
+            }
+
+            .pass-badge {
+                border: 1px solid black !important;
+                color: black !important;
+                background: white !important;
+            }
+
+            .status-banner {
+                background: white !important;
+                color: black !important;
+                border-bottom: 1px solid black !important;
+                padding: 10px 20px !important;
+            }
+
+            .status-dot {
+                background: black !important;
+                animation: none !important;
+            }
+
+            .pass-body {
+                padding: 30px 20px !important;
+                background: white !important;
+                grid-template-columns: 1fr 180px !important;
+                gap: 20px !important;
+            }
+
+            .pass-sidebar {
+                padding-left: 20px !important;
+                border-left: 1px dashed black !important;
+            }
+
+            .qr-card {
+                border: 1px solid black !important;
+            }
+
+            .qr-code {
+                filter: grayscale(100%) !important;
+            }
+
+            .pass-footer {
+                background: white !important;
+                border-top: 1px solid black !important;
+                padding: 20px !important;
+            }
+
+            .signature-line {
+                background-color: black !important;
+            }
+
+            .watermark-stamp {
+                border: 2px double rgba(0, 0, 0, 0.15) !important;
+            }
+
+            .watermark-stamp .stamp-title {
+                color: rgba(0, 0, 0, 0.2) !important;
+            }
+
+            .watermark-stamp span {
+                color: rgba(0, 0, 0, 0.15) !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Upper Action Bar (Hidden when printed) -->
+    <div class="actions-wrapper">
+        <button class="btn-action" onclick="window.print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            Print Gate Pass
+        </button>
+        <button class="btn-action btn-close" onclick="window.close()">
+            Close Window
+        </button>
+    </div>
+
+    <!-- Official Gate Pass Card -->
+    <div class="pass-container">
+        
+        <!-- Header Section -->
+        <div class="pass-header">
+            <div class="college-info">
+                <h1>College Leave Gate Pass</h1>
+                <p>Hostel Leave Management System</p>
+            </div>
+            <div class="pass-badge">
+                Pass ID: #L{{ leave.id }}
+            </div>
+        </div>
+
+        <!-- Approval Status Bar -->
+        <div class="status-banner">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                Status: Approved & Validated
+            </div>
+            <div>Authorized for Departure</div>
+        </div>
+
+        <!-- Core Details -->
+        <div class="pass-body">
+            
+            <div class="info-grid">
+                
+                <div class="info-item">
+                    <span class="info-label">Student Name</span>
+                    <span class="info-value">{{ leave.student.full_name }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Enrollment No.</span>
+                    <span class="info-value">{{ leave.student.enrollment_no }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Hostel & Room</span>
+                    <span class="info-value">{{ leave.hostel }} (Room {{ leave.room }})</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Department</span>
+                    <span class="info-value">{{ leave.student.department }} (Sem {{ leave.student.semester }})</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Leave Duration</span>
+                    <span class="info-value" style="color:var(--accent);">{{ leave.from_date }} &nbsp;to&nbsp; {{ leave.to_date }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Travel Mode</span>
+                    <span class="info-value">{{ leave.travel_mode }}</span>
+                </div>
+
+                <div class="info-item full-width">
+                    <span class="info-label">Leave Reason</span>
+                    <span class="info-value" style="font-weight:400; font-size:14px; line-height:1.5;">{{ leave.reason }}</span>
+                </div>
+
+                <div class="info-item full-width">
+                    <span class="info-label">Address During Leave</span>
+                    <span class="info-value" style="font-weight: 500; font-size:14px;">{{ leave.leave_address }}, {{ leave.city_state_pin }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Parent's Phone</span>
+                    <span class="info-value">{{ leave.parent_phone }}</span>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Parent's Email</span>
+                    <span class="info-value" style="font-size:14px; font-weight:500;">{{ leave.parent_email|default:"N/A" }}</span>
+                </div>
+
+            </div>
+
+            <!-- Sidebar QR area -->
+            <div class="pass-sidebar">
+                
+                <div class="qr-card">
+                    <div class="qr-code"></div>
+                    <span class="qr-text">Scan at Main Gate</span>
+                </div>
+
+                <div class="pass-meta">
+                    <p style="font-weight:700">Digital Validation</p>
+                    <p>Secured Gate Pass</p>
+                    <p style="font-size:9px; font-family:monospace">GP-{{ leave.student.enrollment_no }}-{{ leave.id }}</p>
+                </div>
+
+            </div>
+
+            <!-- Watermark college seal -->
+            <div class="watermark-stamp">
+                <span class="stamp-title">APPROVED</span>
+                <span>HOSTEL OFFICE</span>
+                <span style="font-size:8px">GATE OUT ALLOWED</span>
+            </div>
+
+        </div>
+
+        <!-- Signatures and footer approval dates -->
+        <div class="pass-footer">
+            
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                <span class="signature-title">Proctor Status</span>
+                <span style="color:var(--success); font-weight: 700;">{{ leave.proctor_status }}</span>
+            </div>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                {% if leave.rector_status != "NA" %}
+                    <span class="signature-title">Rector Status</span>
+                    <span style="color:var(--success); font-weight: 700;">{{ leave.rector_status }}</span>
+                {% else %}
+                    <span class="signature-title">HOD Status</span>
+                    <span style="color:var(--success); font-weight: 700;">{{ leave.hod_status }}</span>
+                {% endif %}
+            </div>
+
+            <div class="signature-block">
+                <div class="signature-line"></div>
+                <span class="signature-title">Issued At</span>
+                <span style="font-weight: 500; font-size:11px; color:var(--text-muted);">{{ leave.parent_notification.sent_at|date:"d-m-Y H:i"|default:"Just Now" }}</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

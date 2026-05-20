@@ -66,6 +66,7 @@ tr:nth-child(even){
 .pending{background:#f59e0b;}
 .approved{background:#16a34a;}
 .rejected{background:#dc2626;}
+.na{background:#94a3b8;}
 
 .empty{
     text-align:center;
@@ -111,6 +112,7 @@ tr:nth-child(even){
     <th>Proctor</th>
     <th>HOD</th>
     <th>Final Status</th>
+    <th>Gate Pass</th>
 </tr>
 
 {% for leave in leaves %}
@@ -141,6 +143,16 @@ tr:nth-child(even){
         <span class="badge {{ leave.status|lower }}">
             {{ leave.status }}
         </span>
+    </td>
+    
+    <td>
+        {% if leave.status == "Approved" %}
+            <a href="{% url 'view_gate_pass' leave.id %}" target="_blank" style="text-decoration:none;">
+                <span class="badge" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 5px 12px; font-weight: 600; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">View Pass</span>
+            </a>
+        {% else %}
+            <span class="badge na" style="opacity: 0.7;">N/A</span>
+        {% endif %}
     </td>
 </tr>
 

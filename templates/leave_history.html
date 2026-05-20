@@ -20,6 +20,7 @@
     <th>To</th>
     <th>Reason</th>
     <th>Final Status</th>
+    <th>Gate Pass</th>
 </tr>
 
 {% for leave in history %}
@@ -28,9 +29,18 @@
     <td>{{ leave.to_date }}</td>
     <td>{{ leave.reason }}</td>
     <td>{{ leave.status }}</td>
+    <td>
+        {% if leave.status == "Approved" %}
+            <a href="{% url 'view_gate_pass' leave.id %}" target="_blank" style="text-decoration:none;">
+                <button style="background: linear-gradient(135deg, #2563eb, #1d4ed8); border: none; color: white; padding: 6px 12px; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 12px; box-shadow: 0 2px 4px rgba(37,99,235,0.2);">View Pass</button>
+            </a>
+        {% else %}
+            <span style="color: #64748b; font-size: 12px; font-weight: 600;">N/A</span>
+        {% endif %}
+    </td>
 </tr>
 {% empty %}
-<tr><td colspan="4">No history found</td></tr>
+<tr><td colspan="5">No history found</td></tr>
 {% endfor %}
 
 </table>
