@@ -122,7 +122,7 @@
                     <td>
                         <form method="POST" action="{% url 'hod_approve' leave.id %}" style="display:inline;">
                             {% csrf_token %}
-                            <button class="btn approve">Approve</button>
+                            <button class="btn approve">Approve & Forward to Rector</button>
                         </form>
 
                         <form method="POST" action="{% url 'hod_reject' leave.id %}" style="display:inline;">

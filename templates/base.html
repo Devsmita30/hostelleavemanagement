@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>{% block title %}Leave Management System{% endblock %}</title>
@@ -14,17 +15,19 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
         }
+
         body {
             background-color: #f8fafc;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
+
         /* Top Navbar */
         .navbar {
             width: 100%;
             height: 65px;
-            background: #0f172a; 
+            background: #0f172a;
             color: white;
             display: flex;
             justify-content: space-between;
@@ -33,27 +36,32 @@
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
             z-index: 10;
         }
+
         .navbar h2 {
             font-size: 19px;
             font-weight: 600;
             letter-spacing: 0.5px;
         }
+
         .navbar .profile {
             font-size: 14px;
             color: #cbd5e1;
         }
+
         .navbar .profile a {
-            color: #f43f5e; 
+            color: #f43f5e;
             text-decoration: none;
             margin-left: 5px;
             font-weight: 600;
         }
+
         /* Layout Structure */
         .container-fluid-wrapper {
             display: flex;
             flex: 1;
             width: 100%;
         }
+
         /* Permanent Fixed Sidebar */
         .sidebar {
             width: 240px;
@@ -62,6 +70,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             flex-shrink: 0;
         }
+
         .sidebar a {
             display: block;
             color: #94a3b8;
@@ -72,30 +81,38 @@
             transition: all 0.2s ease-in-out;
             border-left: 4px solid transparent;
         }
+
         .sidebar a:hover {
             background: #1e293b;
             color: #f8fafc;
-            padding-left: 28px; 
+            padding-left: 28px;
         }
+
         .sidebar a.active {
-            background: #2563eb !important; 
+            background: #2563eb !important;
             color: white !important;
             font-weight: 600 !important;
             border-left: 4px solid #60a5fa !important;
         }
+
         /* Shared Content Box */
         .main-content {
             flex: 1;
             padding: 40px;
             overflow-y: auto;
         }
+
         @media (max-width: 992px) {
-            .sidebar { display: none; }
+            .sidebar {
+                display: none;
+            }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
+    <h1>TEST123</h1>
 
     <div class="navbar">
         <h2>College Leave Management</h2>
@@ -142,4 +159,5 @@
         });
     </script>
 </body>
+
 </html>

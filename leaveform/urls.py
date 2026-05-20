@@ -1,19 +1,3 @@
-"""
-URL configuration for leaveform project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from students import views
@@ -26,11 +10,10 @@ urlpatterns = [
     # Student
     path('student_signup/', views.student_signup, name='student_signup'),
     path('student_login/', views.student_login, name='student_login'),
-    path('student/', views.student, name='student_dashboard'),
+    path('student/', views.student, name='student'),
     path('apply_leave/', views.apply_leave, name='apply_leave'),
     path('track_leave/', views.track_leave, name='track_leave'),
     path('leave_history/', views.leave_history, name='leave_history'),
-
     path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
 
     # Rector
@@ -41,13 +24,7 @@ urlpatterns = [
     path('rector_reject/<int:id>/', views.rector_reject, name='rector_reject'),
     path('verify_student/<int:id>/', views.verify_student, name='verify_student'),
 
-
     # Proctor
-
-    #proctor
-    path('proctor/', views.proctor_dashboard, name='proctor'),
-    path('proctor_dashboard/', views.proctor_dashboard, name='proctor_dashboard'),
-
     path('proctor_login/', views.proctor_login, name='proctor_login'),
     path('proctor/', views.proctor_dashboard, name='proctor'),
     path('proctor_dashboard/', views.proctor_dashboard, name='proctor_dashboard'),
@@ -57,17 +34,13 @@ urlpatterns = [
     # HOD
     path('hod_login/', views.hod_login, name='hod_login'),
     path('hod/', views.hod_dashboard, name='hod'),
-
     path('hod_dashboard/', views.hod_dashboard, name='hod_dashboard'),
     path('hod_approve/<int:id>/', views.hod_approve, name='hod_approve'),
     path('hod_reject/<int:id>/', views.hod_reject, name='hod_reject'),
 
-    path('hod_dashboard/',views.hod_dashboard,name='hod_dashboard'),
-
-
     # Logout
     path('logout/', views.logout_view, name='logout'),
 
-    #verification
-    path('verify_student/<int:id>/', views.verify_student, name='verify_student'),
+    # Gate Pass
+    path('gate_pass/<int:leave_id>/', views.view_gate_pass, name='view_gate_pass'),
 ]
