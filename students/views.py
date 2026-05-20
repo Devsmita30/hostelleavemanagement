@@ -439,6 +439,9 @@ def proctor_dashboard(request):
 
 def proctor_approve(request, id):
 
+    if request.session.get('role') != 'proctor':
+        return redirect("proctor_login")
+
     leave = Leave.objects.get(id=id)
 
     leave.proctor_status = "Approved"
@@ -451,6 +454,9 @@ def proctor_approve(request, id):
 
 
 def proctor_reject(request, id):
+
+    if request.session.get('role') != 'proctor':
+        return redirect("proctor_login")
 
     leave = Leave.objects.get(id=id)
 
