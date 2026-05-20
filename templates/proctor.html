@@ -259,7 +259,7 @@
         <div id="default-dashboard-content">
 
         <!-- Pending Queue -->
-        <div class="card" id="pending-requests">
+        <div class="card">
             <h3>Pending Leave Requests</h3>
 
             <table>
@@ -286,81 +286,85 @@
                                 <button type="submit" class="btn approve" style="margin-right: 4px;">Forward to HOD</button>
                             </form>
 
-                {% for leave in pending_leaves %}
-                <tr>
-                    <td>{{ leave.student.full_name }}</td>
-                    <td>{{ leave.from_date }}</td>
-                    <td>{{ leave.to_date }}</td>
-                    <td>{{ leave.reason }}</td>
-                    <td>
-
-                        <!-- Approve and forward to Rector -->
-                        <form method="POST" action="{% url 'proctor_approve' leave.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn approve">Approve & Forward to Rector</button>
-                        </form>
-
-                        <!-- Do not approve, forward to HOD -->
-                        <form method="POST" action="{% url 'proctor_reject' leave.id %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn forward">Forward to HOD</button>
-                        </form>
-
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5">No Pending Requests</td>
-                </tr>
-                {% endfor %}
+                            <!-- Reject -->
+                            <form method="POST" action="{% url 'proctor_reject' leave.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn" style="background: var(--danger); color:white; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#b91c1c'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(220, 38, 38, 0.2)'" onmouseout="this.style.background='var(--danger)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.05)'">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No Pending Requests</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div>
 
         <!-- History Section -->
-        <div class="card" id="history">
+        <div class="card">
             <h3>Recent History</h3>
 
             <table>
-                <tr>
-                    <th>Student</th>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Proctor Decision</th>
-                </tr>
-
-                {% for leave in history_leaves %}
-                <tr>
-                    <td>{{ leave.student.full_name }}</td>
-                    <td>{{ leave.from_date }}</td>
-                    <td>{{ leave.to_date }}</td>
-                    <td>
-                        <span class="status-badge {{ leave.proctor_status|lower }}">
-                            {{ leave.proctor_status }}
-                        </span>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4">No History Found</td>
-                </tr>
-                {% endfor %}
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in history_leaves %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ leave.student.name }}</td>
+                        <td>{{ leave.from_date }}</td>
+                        <td>{{ leave.to_date }}</td>
+                        <td>
+                            <span class="status-badge {{ leave.status|lower }}">
+                                {{ leave.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No History Found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
         </div> 
         
         </div> <!-- End default-dashboard-content -->
         
+        <!-- Iframe Container -->
+        <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border: 1px solid var(--border);"></iframe>
+
     </div>
 </div>
 
 <script>
     document.querySelectorAll('.sidebar a').forEach(link => {
         link.addEventListener('click', function(e) {
-            if (this.getAttribute('href') === '#') {
-                e.preventDefault();
-            }
+            if (this.getAttribute('href').includes('logout')) return;
 
-            document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
-            this.classList.add('active');
+            if (this.getAttribute('data-target') === 'frame') {
+                if (this.getAttribute('href') === '#') e.preventDefault(); // ignore empty links
+                document.getElementById('default-dashboard-content').style.display = 'none';
+                document.getElementById('dashboard_frame').style.display = 'block';
+                
+                document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+            } 
+            else if (this.getAttribute('data-target') === 'dashboard') {
+                e.preventDefault();
+                document.getElementById('default-dashboard-content').style.display = 'block';
+                document.getElementById('dashboard_frame').style.display = 'none';
+
+                document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+            }
         });
     });
 </script>
