@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'leaveform.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mysql.connector.django',
-        'NAME': 'hostel_leave_db',
+        'NAME': 'leave_management',
         'USER': 'root',
         'PASSWORD': '3029',
         'HOST': 'localhost',
