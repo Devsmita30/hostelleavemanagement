@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.db.models import Q
 
@@ -45,6 +45,55 @@ def blank_student_semester_filter(semester):
         query |= Q(student__semester__iexact=semester)
 
     return query
+
+
+def get_role_dashboard_url(role):
+    if role == 'rector':
+        return 'rector_dashboard'
+    if role == 'proctor':
+        return 'proctor_dashboard'
+    if role == 'hod':
+        return 'hod_dashboard'
+
+    return 'login'
+
+
+def role_leave_queryset(request):
+    role = request.session.get('role')
+
+    if role == 'rector':
+        hostel = request.session.get('hostel_block')
+        return Leave.objects.filter(student__hostel_block=hostel)
+
+    if role == 'proctor':
+        try:
+            proctor = Proctor.objects.get(id=request.session.get('proctor_id'))
+        except Proctor.DoesNotExist:
+            return Leave.objects.none()
+
+        department = normalize_filter_value(proctor.department)
+        semester = normalize_filter_value(proctor.semester)
+
+        return Leave.objects.filter(
+            blank_student_department_filter(department),
+            blank_student_semester_filter(semester)
+        )
+
+    if role == 'hod':
+        try:
+            hod = HOD.objects.get(id=request.session.get('hod_id'))
+        except HOD.DoesNotExist:
+            return Leave.objects.none()
+
+        department = normalize_filter_value(hod.department)
+        semester = normalize_filter_value(hod.semester)
+
+        return Leave.objects.filter(
+            blank_student_department_filter(department),
+            blank_student_semester_filter(semester)
+        )
+
+    return Leave.objects.none()
 
 
 # ------------ STUDENT SIGNUP -------------
@@ -277,6 +326,7 @@ def rector_dashboard(request):
         "unverified_students": unverified_students,
 
         "pending_final": pending_final,
+        "all_applications": role_leave_queryset(request).order_by('-id'),
 
         "total": total,
         "pending": pending,
@@ -433,7 +483,8 @@ def proctor_dashboard(request):
 
     return render(request, "proctor.html", {
         "pending_leaves": leaves.order_by('-id'),
-        "history_leaves": history_leaves.order_by('-id')
+        "history_leaves": history_leaves.order_by('-id'),
+        "all_applications": role_leave_queryset(request).order_by('-id'),
     })
 
 
@@ -529,7 +580,8 @@ def hod_dashboard(request):
 
     return render(request, "hod.html", {
         "escalated_leaves": leaves.order_by('-id'),
-        "history_leaves": history_leaves.order_by('-id')
+        "history_leaves": history_leaves.order_by('-id'),
+        "all_applications": role_leave_queryset(request).order_by('-id'),
     })
 
 
@@ -568,6 +620,22 @@ def verify_student(request, id):
     student.save()
 
     return redirect('rector_dashboard')
+
+
+# ----------- VIEW FULL LEAVE APPLICATION ------------
+def view_leave_application(request, leave_id):
+    role = request.session.get('role')
+
+    if role not in ['rector', 'proctor', 'hod']:
+        return redirect('login')
+
+    leave = get_object_or_404(role_leave_queryset(request), id=leave_id)
+
+    return render(request, "leave_application_detail.html", {
+        "leave": leave,
+        "role": role,
+        "back_url": get_role_dashboard_url(role),
+    })
 
 
 # ----------- VIEW GATE PASS ------------
