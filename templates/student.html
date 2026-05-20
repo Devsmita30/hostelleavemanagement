@@ -80,6 +80,17 @@
             background: rgba(255, 255, 255, 0.15);
         }
 
+        .navbar .profile a {
+            color: #f87171;
+            text-decoration: none;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
+        .navbar .profile a:hover {
+            text-decoration: underline;
+        }
+
         /* Layout */
         .container {
             display: flex;
@@ -310,7 +321,7 @@
     <!-- Navbar -->
     <div class="navbar">
         <h2>College Leave Management</h2>
-        <div class="profile">Student | Logout</div>
+        <div class="profile">{{ request.session.student_name }} | <a href="{% url 'logout' %}">Logout</a> </div>
     </div>
 
     <div class="container">
