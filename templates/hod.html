@@ -289,18 +289,27 @@
                                 <button type="submit" class="btn approve" style="margin-right: 4px;">Approve</button>
                             </form>
 
-                            <form method="POST" action="{% url 'hod_reject' leave.id %}" style="display:inline;">
-                                {% csrf_token %}
-                                <button type="submit" class="btn reject">Reject</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No Forwarded Leaves</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+                {% for leave in escalated_leaves %}
+                <tr>
+                    <td>{{ leave.student.full_name }}</td>
+                    <td>{{ leave.from_date }}</td>
+                    <td>{{ leave.to_date }}</td>
+                    <td>{{ leave.reason }}</td>
+                    <td>
+                        <form method="POST" action="{% url 'hod_approve' leave.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button class="btn approve">Approve & Forward to Rector</button>
+                        </form>
+
+                        <form method="POST" action="{% url 'hod_reject' leave.id %}" style="display:inline;">
+                            {% csrf_token %}
+                            <button class="btn reject">Reject</button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">No Forwarded Leaves</td></tr>
+                {% endfor %}
             </table>
         </div>
 

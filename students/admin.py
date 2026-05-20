@@ -31,6 +31,6 @@ class HODAdmin(admin.ModelAdmin):
 
 @admin.register(ParentNotification)
 class ParentNotificationAdmin(admin.ModelAdmin):
-    list_display = ['leave', 'parent_name', 'parent_phone', 'gate_pass_status', 'status', 'sent_at']
-    search_fields = ['leave__student__full_name', 'leave__student__enrollment_no', 'parent_name', 'parent_phone']
+    list_display = ['leave', 'parent_name', 'parent_phone', 'parent_email', 'gate_pass_status', 'status', 'sent_at']
+    search_fields = ['leave__student__full_name', 'leave__student__enrollment_no', 'parent_name', 'parent_phone', 'parent_email']
     list_filter = ['gate_pass_status', 'status', 'sent_at']

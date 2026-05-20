@@ -22,6 +22,31 @@ def get_logged_in_student(request):
         return None
 
 
+def normalize_filter_value(value):
+    if value is None:
+        return ''
+
+    return str(value).strip()
+
+
+def blank_student_department_filter(department):
+    query = Q(student__department__isnull=True) | Q(student__department='')
+
+    if department:
+        query |= Q(student__department__iexact=department)
+
+    return query
+
+
+def blank_student_semester_filter(semester):
+    query = Q(student__semester__isnull=True) | Q(student__semester='')
+
+    if semester:
+        query |= Q(student__semester__iexact=semester)
+
+    return query
+
+
 # ------------ STUDENT SIGNUP -------------
 def student(request):
     return redirect("student_dashboard")
@@ -118,13 +143,19 @@ def apply_leave(request):
             student_contact=request.POST.get('student_contact'),
             parent_name=request.POST.get('parent_name'),
             parent_phone=request.POST.get('parent_phone'),
+            parent_email=request.POST.get('parent_email', ''),
 
             from_date=request.POST.get('from_date'),
             to_date=request.POST.get('to_date'),
             travel_mode=request.POST.get('travel_mode'),
             leave_address=request.POST.get('leave_address'),
             city_state_pin=request.POST.get('city_state_pin'),
-            reason=request.POST.get('reason')
+            reason=request.POST.get('reason'),
+
+            proctor_status="Pending",
+            rector_status="Pending",
+            hod_status="Pending",
+            status="Pending"
         )
 
         messages.success(request, "Leave request submitted successfully.")
@@ -210,9 +241,13 @@ def rector_dashboard(request):
         hostel_block=hostel
     )
 
-    # All leaves for this hostel
+    # All leaves for this hostel that are ready for Rector approval.
+    # Route 1: Proctor approved directly.
+    # Route 2: Proctor forwarded to HOD and HOD approved.
     all_leaves = Leave.objects.filter(
-        student__hostel_block=hostel
+        student__hostel_block=hostel,
+    ).filter(
+        Q(proctor_status="Approved") | Q(hod_status="Approved")
     )
 
     # Pending approvals
@@ -286,11 +321,22 @@ def send_parent_gate_pass_notification(leave):
         defaults={
             "parent_name": leave.parent_name,
             "parent_phone": leave.parent_phone,
+            "parent_email": leave.parent_email,
             "message": message,
             "gate_pass_status": gate_pass_status,
             "status": "Sent",
         },
     )
+
+    # Simulated Parent Notifications in Terminal
+    print("\n" + "="*50)
+    print(" [PARENT NOTIFICATION SENT SUCCESSFULLY]")
+    print(f" To: {leave.parent_name}")
+    print(f" SMS sent to mobile: {leave.parent_phone}")
+    print(f" Email sent to: {leave.parent_email}")
+    print("-"*50)
+    print(message)
+    print("="*50 + "\n")
 
 
 def rector_approve(request, id):
@@ -361,23 +407,33 @@ def proctor_dashboard(request):
     if request.session.get('role') != 'proctor':
         return redirect("proctor_login")
 
-    department = request.session.get('department')
-    semester = request.session.get('semester')
+    try:
+        proctor = Proctor.objects.get(id=request.session.get('proctor_id'))
+    except Proctor.DoesNotExist:
+        request.session.flush()
+        return redirect("proctor_login")
+
+    department = normalize_filter_value(proctor.department)
+    semester = normalize_filter_value(proctor.semester)
 
     leaves = Leave.objects.filter(
         proctor_status="Pending",
         status="Pending",
-        student__department=department,
-        student__semester=semester
+    ).filter(
+        blank_student_department_filter(department),
+        blank_student_semester_filter(semester)
     )
 
-    history_leaves = Leave.objects.exclude(
+    history_leaves = Leave.objects.filter(
+        blank_student_department_filter(department),
+        blank_student_semester_filter(semester)
+    ).exclude(
         proctor_status="Pending"
     )
 
     return render(request, "proctor.html", {
-        "pending_leaves": leaves,
-        "history_leaves": history_leaves
+        "pending_leaves": leaves.order_by('-id'),
+        "history_leaves": history_leaves.order_by('-id')
     })
 
 
@@ -386,6 +442,8 @@ def proctor_approve(request, id):
     leave = Leave.objects.get(id=id)
 
     leave.proctor_status = "Approved"
+    leave.rector_status = "Pending"
+    leave.hod_status = "NA"
 
     leave.save()
 
@@ -397,6 +455,8 @@ def proctor_reject(request, id):
     leave = Leave.objects.get(id=id)
 
     leave.proctor_status = "Rejected"
+    leave.rector_status = "NA"
+    leave.hod_status = "Pending"
 
     leave.save()
 
@@ -437,18 +497,33 @@ def hod_dashboard(request):
     if request.session.get('role') != 'hod':
         return redirect("hod_login")
 
+    try:
+        hod = HOD.objects.get(id=request.session.get('hod_id'))
+    except HOD.DoesNotExist:
+        request.session.flush()
+        return redirect("hod_login")
+
+    department = normalize_filter_value(hod.department)
+    semester = normalize_filter_value(hod.semester)
+
     leaves = Leave.objects.filter(
         proctor_status="Rejected",
-        hod_status="Pending"
+        hod_status="Pending",
+    ).filter(
+        blank_student_department_filter(department),
+        blank_student_semester_filter(semester)
     )
 
     history_leaves = Leave.objects.filter(
         proctor_status="Rejected"
+    ).filter(
+        blank_student_department_filter(department),
+        blank_student_semester_filter(semester)
     ).exclude(hod_status="Pending")
 
     return render(request, "hod.html", {
-        "escalated_leaves": leaves,
-        "history_leaves": history_leaves
+        "escalated_leaves": leaves.order_by('-id'),
+        "history_leaves": history_leaves.order_by('-id')
     })
 
 
@@ -457,10 +532,10 @@ def hod_approve(request, id):
     leave = Leave.objects.get(id=id)
 
     leave.hod_status = "Approved"
+    leave.rector_status = "Pending"
+    leave.status = "Pending"
 
     leave.save()
-
-    send_parent_gate_pass_notification(leave)
 
     return redirect("hod_dashboard")
 
@@ -470,6 +545,7 @@ def hod_reject(request, id):
     leave = Leave.objects.get(id=id)
 
     leave.hod_status = "Rejected"
+    leave.status = "Rejected"
 
     leave.save()
 
@@ -486,3 +562,20 @@ def verify_student(request, id):
     student.save()
 
     return redirect('rector_dashboard')
+
+
+# ----------- VIEW GATE PASS ------------
+def view_gate_pass(request, leave_id):
+    try:
+        leave = Leave.objects.get(id=leave_id)
+    except Leave.DoesNotExist:
+        messages.error(request, "Leave request not found.")
+        return redirect("student_dashboard")
+
+    if leave.status != "Approved":
+        messages.error(request, "Gate pass is not available yet as the leave has not been approved.")
+        return redirect("track_leave")
+
+    return render(request, "gate_pass.html", {
+        "leave": leave
+    })

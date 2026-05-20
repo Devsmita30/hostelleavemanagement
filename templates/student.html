@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Student Dashboard - Leave Management</title>
@@ -96,6 +97,7 @@
             display: flex;
             flex: 1;
             overflow: hidden;
+            min-height: calc(100vh - 60px);
         }
 
         /* Sidebar */
@@ -137,6 +139,7 @@
             flex: 1;
             padding: 40px;
             overflow-y: auto;
+            min-width: 0;
         }
 
         .main-content h2 {
@@ -299,6 +302,32 @@
         .status.pending { background: var(--warning-light); color: var(--warning); }
         .status.approved { background: var(--success-light); color: var(--success); }
         .status.rejected { background: var(--danger-light); color: var(--danger); }
+        .status.pending {
+            background: #f59e0b;
+        }
+
+        .status.approved {
+            background: #10b981;
+        }
+
+        .status.rejected {
+            background: #ef4444;
+        }
+
+        .empty {
+            color: #64748b;
+            text-align: center;
+        }
+
+        #dashboard_frame {
+            width: 100%;
+            height: 100%;
+            min-height: calc(100vh - 100px);
+            display: none;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
 
         /* Responsive */
         @media (max-width: 768px) {
@@ -337,7 +366,7 @@
 
         <!-- Main Content -->
         <div class="main-content">
-            
+
             <div id="default-dashboard-content">
 
             <h2>Student Dashboard</h2>
@@ -399,7 +428,7 @@
             </div>
 
             </div> <!-- End default-dashboard-content -->
-            
+
             <!-- Iframe Container -->
             <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border: 1px solid var(--border);"></iframe>
 
@@ -433,4 +462,5 @@
         });
     </script>
 </body>
+
 </html>

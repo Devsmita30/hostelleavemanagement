@@ -411,33 +411,34 @@
                 </div>
             </div>
 
-            <!-- Unverified Students Section -->
+            <!-- Student Verification Table -->
             <div class="section-card">
-                <h3>Unverified Students</h3>
+                <h3>Student Account Verification</h3>
                 <table>
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Enrollment</th>
-                            <th>Hostel</th>
+                            <th>Full Name</th>
+                            <th>Enrollment No.</th>
+                            <th>Hostel & Room</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for student in unverified_students %}
                         <tr>
-                            <td style="font-weight: 600;">{{ student.full_name }}</td>
+                            <td>{{ student.full_name }}</td>
                             <td>{{ student.enrollment_no }}</td>
-                            <td><span class="status pending" style="border-radius: 6px; padding: 4px 10px;">{{ student.hostel_block }}</span></td>
+                            <td>{{ student.hostel_block }} (Room {{ student.room_number }})</td>
                             <td>
-                                <a href="{% url 'verify_student' student.id %}">
-                                    <button class="btn approve">Verify</button>
-                                </a>
+                                <form method="POST" action="{% url 'verify_student' student.id %}" style="display:inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn approve">Verify</button>
+                                </form>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No students to verify</td>
+                            <td colspan="4" style="text-align: center; padding: 20px; color: #64748b;">No Pending Verifications</td>
                         </tr>
                         {% endfor %}
                     </tbody>

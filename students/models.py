@@ -67,6 +67,7 @@ class Leave(models.Model):
 
     parent_name = models.CharField(max_length=100)
     parent_phone = models.CharField(max_length=15)
+    parent_email = models.EmailField(default="", blank=True, null=True)
 
     from_date = models.DateField()
     to_date = models.DateField()
@@ -92,6 +93,7 @@ class ParentNotification(models.Model):
     leave = models.OneToOneField(Leave, on_delete=models.CASCADE, related_name="parent_notification")
     parent_name = models.CharField(max_length=100)
     parent_phone = models.CharField(max_length=15)
+    parent_email = models.EmailField(blank=True, null=True)
     message = models.TextField()
     gate_pass_status = models.CharField(max_length=30, default="Generated")
     sent_at = models.DateTimeField(auto_now_add=True)
