@@ -52,18 +52,6 @@ Students can apply for leave requests, and approvals flow through Proctor → HO
 
 ---
 
-# Project Structure
-
-leaveform/
-│
-├── leaveform/           # Main project settings
-├── students/            # Main application
-├── templates/           # HTML templates
-├── static/              # CSS/JS/Images
-├── requirements.txt
-├── manage.py
-├── .env
-└── README.md# Hostel Leave Management System
 
 # Installation Guide
 
