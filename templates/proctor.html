@@ -145,8 +145,8 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <a href="#" class="active" data-target="dashboard">Dashboard</a>
-        <a href="#" data-target="frame">Pending Requests</a>
-        <a href="#" data-target="frame">History</a>
+        <a href="#pending-requests">Pending Requests</a>
+        <a href="#history">History</a>
         <a href="{% url 'logout' %}">Logout</a>
     </div>
 
@@ -156,7 +156,7 @@
         <div id="default-dashboard-content">
 
         <!-- Pending Queue -->
-        <div class="card">
+        <div class="card" id="pending-requests">
             <h3>Pending Leave Requests</h3>
 
             <table>
@@ -176,16 +176,16 @@
                     <td>{{ leave.reason }}</td>
                     <td>
 
-                        <!-- Forward -->
+                        <!-- Approve and forward to Rector -->
                         <form method="POST" action="{% url 'proctor_approve' leave.id %}" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn approve">Forward to HOD</button>
+                            <button type="submit" class="btn approve">Approve & Forward to Rector</button>
                         </form>
 
-                        <!-- Reject -->
+                        <!-- Do not approve, forward to HOD -->
                         <form method="POST" action="{% url 'proctor_reject' leave.id %}" style="display:inline;">
                             {% csrf_token %}
-                            <button type="submit" class="btn" style="background:#dc2626; color:white;">Reject</button>
+                            <button type="submit" class="btn forward">Forward to HOD</button>
                         </form>
 
                     </td>
@@ -199,7 +199,7 @@
         </div>
 
         <!-- History Section -->
-        <div class="card">
+        <div class="card" id="history">
             <h3>Recent History</h3>
 
             <table>
@@ -207,7 +207,7 @@
                     <th>Student</th>
                     <th>From</th>
                     <th>To</th>
-                    <th>Status</th>
+                    <th>Proctor Decision</th>
                 </tr>
 
                 {% for leave in history_leaves %}
@@ -216,8 +216,8 @@
                     <td>{{ leave.from_date }}</td>
                     <td>{{ leave.to_date }}</td>
                     <td>
-                        <span class="status-badge {{ leave.status|lower }}">
-                            {{ leave.status }}
+                        <span class="status-badge {{ leave.proctor_status|lower }}">
+                            {{ leave.proctor_status }}
                         </span>
                     </td>
                 </tr>
@@ -229,33 +229,18 @@
             </table>
         </div> <!-- End default-dashboard-content -->
         
-        <!-- Iframe Container -->
-        <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 8px;"></iframe>
-
     </div>
 </div>
 
 <script>
     document.querySelectorAll('.sidebar a').forEach(link => {
         link.addEventListener('click', function(e) {
-            if (this.getAttribute('href').includes('logout')) return;
-
-            if (this.getAttribute('data-target') === 'frame') {
-                if (this.getAttribute('href') === '#') e.preventDefault(); // ignore empty links
-                document.getElementById('default-dashboard-content').style.display = 'none';
-                document.getElementById('dashboard_frame').style.display = 'block';
-                
-                document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
-            } 
-            else if (this.getAttribute('data-target') === 'dashboard') {
+            if (this.getAttribute('href') === '#') {
                 e.preventDefault();
-                document.getElementById('default-dashboard-content').style.display = 'block';
-                document.getElementById('dashboard_frame').style.display = 'none';
-
-                document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
             }
+
+            document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
+            this.classList.add('active');
         });
     });
 </script>
