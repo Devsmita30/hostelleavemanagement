@@ -184,8 +184,8 @@
     <main class="page">
         <section class="summary">
             <div>
-                <h2>{{ leave.student.full_name }}</h2>
-                <p>{{ leave.student.enrollment_no }} | {{ leave.student.department }} | Semester {{ leave.student.semester }}</p>
+                <h2>{{ leave.display_name }}</h2>
+                <p>{{ leave.display_enrollment }} | {{ leave.student.department }} | Semester {{ leave.student.semester }}</p>
                 <p>{{ leave.hostel }} Hostel, Room {{ leave.room }}</p>
             </div>
             <span class="badge {{ leave.status|lower }}">{{ leave.status }}</span>
@@ -196,9 +196,9 @@
                 <h3>Student Details</h3>
                 <div class="detail-list">
                     <div class="label">Full Name</div>
-                    <div class="value">{{ leave.student.full_name }}</div>
+                    <div class="value">{{ leave.display_name }}</div>
                     <div class="label">Enrollment</div>
-                    <div class="value">{{ leave.student.enrollment_no }}</div>
+                    <div class="value">{{ leave.display_enrollment }}</div>
                     <div class="label">Email</div>
                     <div class="value">{{ leave.student_email }}</div>
                     <div class="label">Contact</div>

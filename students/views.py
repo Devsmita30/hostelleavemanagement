@@ -185,9 +185,11 @@ def apply_leave(request):
 
         Leave.objects.create(
             student=student,
-            hostel=student.hostel_block,
-            room=student.room_number,
-            student_email=student.email,
+            name=request.POST.get('name', student.full_name),
+            enrollment=request.POST.get('enrollment', student.enrollment_no),
+            hostel=request.POST.get('hostel', student.hostel_block),
+            room=request.POST.get('room', student.room_number),
+            student_email=request.POST.get('student_email', student.email),
 
             student_contact=request.POST.get('student_contact'),
             parent_name=request.POST.get('parent_name'),
@@ -351,8 +353,8 @@ def send_parent_gate_pass_notification(leave):
         f"Dear {leave.parent_name},\n\n"
         f"Your ward's leave request has been approved and the gate pass is {gate_pass_status}.\n\n"
         f"Student Details:\n"
-        f"Name: {leave.student.full_name}\n"
-        f"Enrollment No: {leave.student.enrollment_no}\n"
+        f"Name: {leave.display_name}\n"
+        f"Enrollment No: {leave.display_enrollment}\n"
         f"Hostel: {leave.hostel}\n"
         f"Room: {leave.room}\n"
         f"Student Contact: {leave.student_contact}\n"
