@@ -493,12 +493,12 @@
                 
                 <div class="info-item">
                     <span class="info-label">Student Name</span>
-                    <span class="info-value">{{ leave.student.full_name }}</span>
+                    <span class="info-value">{{ leave.display_name }}</span>
                 </div>
 
                 <div class="info-item">
                     <span class="info-label">Enrollment No.</span>
-                    <span class="info-value">{{ leave.student.enrollment_no }}</span>
+                    <span class="info-value">{{ leave.display_enrollment }}</span>
                 </div>
 
                 <div class="info-item">
@@ -554,7 +554,7 @@
                 <div class="pass-meta">
                     <p style="font-weight:700">Digital Validation</p>
                     <p>Secured Gate Pass</p>
-                    <p style="font-size:9px; font-family:monospace">GP-{{ leave.student.enrollment_no }}-{{ leave.id }}</p>
+                    <p style="font-size:9px; font-family:monospace">GP-{{ leave.display_enrollment }}-{{ leave.id }}</p>
                 </div>
 
             </div>
