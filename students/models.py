@@ -55,8 +55,8 @@ class HOD(models.Model):
     
 class Leave(models.Model):
 
-    #name = models.CharField(max_length=100)
-    #enrollment = models.CharField(max_length=20)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    enrollment = models.CharField(max_length=20, null=True, blank=True)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
     hostel = models.CharField(max_length=50)
@@ -85,8 +85,16 @@ class Leave(models.Model):
 
     status = models.CharField(max_length=20, default="Pending")
 
+    @property
+    def display_name(self):
+        return self.name if self.name else self.student.full_name
+
+    @property
+    def display_enrollment(self):
+        return self.enrollment if self.enrollment else self.student.enrollment_no
+
     def __str__(self):
-        return f"{self.student.full_name} - {self.status}"
+        return f"{self.display_name} - {self.status}"
 
 
 class ParentNotification(models.Model):

@@ -41,6 +41,9 @@ urlpatterns = [
     # Logout
     path('logout/', views.logout_view, name='logout'),
 
+    # Leave Application Detail
+    path('leave_application/<int:leave_id>/', views.view_leave_application, name='view_leave_application'),
+
     # Gate Pass
     path('gate_pass/<int:leave_id>/', views.view_gate_pass, name='view_gate_pass'),
 ]

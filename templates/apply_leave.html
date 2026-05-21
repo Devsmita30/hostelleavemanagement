@@ -130,13 +130,13 @@
                     <div class="col-md-6">
                         <label for="name">Full Name *</label>
                         <input type="text" id="name" name="name" class="form-control" value="{{ student.full_name }}"
-                            readonly required>
+                            required>
                     </div>
 
                     <div class="col-md-6">
                         <label for="enrollment">Enrollment Number *</label>
                         <input type="text" id="enrollment" name="enrollment" class="form-control"
-                            value="{{ student.enrollment_no }}" readonly required>
+                            value="{{ student.enrollment_no }}" required>
                     </div>
 
                     <div class="col-md-6">
@@ -166,18 +166,21 @@
                     <div class="col-md-6">
                         <label for="room">Room Number *</label>
                         <input type="text" id="room" name="room" class="form-control" value="{{ student.room_number }}"
-                            readonly required>
+                            required>
                     </div>
 
                     <div class="col-md-6">
                         <label for="student_contact">Student Contact *</label>
-                        <input type="tel" id="student_contact" name="student_contact" class="form-control" required>
+                        <input type="tel" id="student_contact" name="student_contact" class="form-control" 
+                            pattern="[0-9]{10}" maxlength="10" title="Please enter a valid 10-digit mobile number" 
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
                     </div>
 
                     <div class="col-md-6">
                         <label for="student_email">Student Email *</label>
                         <input type="email" id="student_email" name="student_email" class="form-control"
-                            value="{{ student.email }}" readonly required>
+                            value="{{ student.email }}" pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" 
+                            title="Please enter a valid email address (e.g. name@example.com)" required>
                     </div>
 
                     <div class="col-md-6">
@@ -187,12 +190,16 @@
 
                     <div class="col-md-6">
                         <label for="parent_phone">Parent / Guardian Phone *</label>
-                        <input type="tel" id="parent_phone" name="parent_phone" class="form-control" required>
+                        <input type="tel" id="parent_phone" name="parent_phone" class="form-control" 
+                            pattern="[0-9]{10}" maxlength="10" title="Please enter a valid 10-digit mobile number" 
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" required>
                     </div>
 
                     <div class="col-md-6">
                         <label for="parent_email">Parent / Guardian Email *</label>
-                        <input type="email" id="parent_email" name="parent_email" class="form-control" required>
+                        <input type="email" id="parent_email" name="parent_email" class="form-control" 
+                            pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$" 
+                            title="Please enter a valid email address (e.g. name@example.com)" required>
                     </div>
                 </div>
             </section>
