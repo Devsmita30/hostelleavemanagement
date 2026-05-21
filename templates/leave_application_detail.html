@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Leave Application Details</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg: #f8fafc;
+            --panel: #ffffff;
+            --text: #1e293b;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --primary: #2563eb;
+            --success: #16a34a;
+            --danger: #dc2626;
+            --warning: #f59e0b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 65px;
+            background: #0f172a;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+        }
+
+        .topbar h1 {
+            font-size: 1.15rem;
+            letter-spacing: 0.3px;
+        }
+
+        .back-link {
+            color: white;
+            background: var(--primary);
+            text-decoration: none;
+            padding: 9px 16px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .page {
+            max-width: 1120px;
+            margin: 32px auto;
+            padding: 0 24px 40px;
+        }
+
+        .summary {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .summary h2 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .summary p {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 14px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+
+        .badge.pending { background: #fffbeb; color: var(--warning); }
+        .badge.approved { background: #f0fdf4; color: var(--success); }
+        .badge.rejected { background: #fef2f2; color: var(--danger); }
+        .badge.na { background: #f1f5f9; color: var(--muted); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .wide {
+            grid-column: 1 / -1;
+        }
+
+        h3 {
+            font-size: 1rem;
+            margin-bottom: 18px;
+        }
+
+        .detail-list {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            row-gap: 14px;
+            column-gap: 18px;
+        }
+
+        .label {
+            color: var(--muted);
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .value {
+            line-height: 1.55;
+            overflow-wrap: anywhere;
+        }
+
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        @media (max-width: 760px) {
+            .topbar {
+                height: auto;
+                padding: 18px 20px;
+                gap: 14px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .summary {
+                flex-direction: column;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-list {
+                grid-template-columns: 1fr;
+                row-gap: 6px;
+            }
+
+            .value {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <h1>Full Leave Application</h1>
+        <a class="back-link" href="{% url back_url %}">Back to Dashboard</a>
+    </div>
+
+    <main class="page">
+        <section class="summary">
+            <div>
+                <h2>{{ leave.display_name }}</h2>
+                <p>{{ leave.display_enrollment }} | {{ leave.student.department }} | Semester {{ leave.student.semester }}</p>
+                <p>{{ leave.hostel }} Hostel, Room {{ leave.room }}</p>
+            </div>
+            <span class="badge {{ leave.status|lower }}">{{ leave.status }}</span>
+        </section>
+
+        <div class="grid">
+            <section class="card">
+                <h3>Student Details</h3>
+                <div class="detail-list">
+                    <div class="label">Full Name</div>
+                    <div class="value">{{ leave.display_name }}</div>
+                    <div class="label">Enrollment</div>
+                    <div class="value">{{ leave.display_enrollment }}</div>
+                    <div class="label">Email</div>
+                    <div class="value">{{ leave.student_email }}</div>
+                    <div class="label">Contact</div>
+                    <div class="value">{{ leave.student_contact }}</div>
+                    <div class="label">Hostel</div>
+                    <div class="value">{{ leave.hostel }}</div>
+                    <div class="label">Room</div>
+                    <div class="value">{{ leave.room }}</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3>Parent Details</h3>
+                <div class="detail-list">
+                    <div class="label">Parent Name</div>
+                    <div class="value">{{ leave.parent_name }}</div>
+                    <div class="label">Phone</div>
+                    <div class="value">{{ leave.parent_phone }}</div>
+                    <div class="label">Email</div>
+                    <div class="value">{{ leave.parent_email|default:"N/A" }}</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3>Leave Dates</h3>
+                <div class="detail-list">
+                    <div class="label">From Date</div>
+                    <div class="value">{{ leave.from_date }}</div>
+                    <div class="label">To Date</div>
+                    <div class="value">{{ leave.to_date }}</div>
+                    <div class="label">Travel Mode</div>
+                    <div class="value">{{ leave.travel_mode }}</div>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3>Approval Status</h3>
+                <div class="status-row">
+                    <span class="badge {{ leave.proctor_status|lower }}">Proctor: {{ leave.proctor_status }}</span>
+                    <span class="badge {{ leave.hod_status|lower }}">HOD: {{ leave.hod_status }}</span>
+                    <span class="badge {{ leave.rector_status|lower }}">Rector: {{ leave.rector_status }}</span>
+                </div>
+            </section>
+
+            <section class="card wide">
+                <h3>Address During Leave</h3>
+                <div class="detail-list">
+                    <div class="label">Address</div>
+                    <div class="value">{{ leave.leave_address }}</div>
+                    <div class="label">City State Pin</div>
+                    <div class="value">{{ leave.city_state_pin }}</div>
+                </div>
+            </section>
+
+            <section class="card wide">
+                <h3>Reason For Leave</h3>
+                <div class="value">{{ leave.reason }}</div>
+            </section>
+        </div>
+    </main>
+</body>
+</html>

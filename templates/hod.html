@@ -219,6 +219,31 @@
             box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
         }
 
+        .view-link {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 14px;
+            border-radius: 6px;
+            background: #eff6ff;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-right: 4px;
+        }
+
+        .view-link:hover {
+            background: #dbeafe;
+        }
+
+        .dashboard-section {
+            display: none;
+        }
+
+        .dashboard-section.active-section {
+            display: block;
+        }
+
         /* Status Badge Components */
         .badge {
             display: inline-flex;
@@ -231,7 +256,9 @@
         }
 
         .approved { background: var(--success-light); color: var(--success); }
+        .pending { background: #fffbeb; color: #f59e0b; }
         .rejected { background: var(--danger-light); color: var(--danger); }
+        .na { background: #f1f5f9; color: var(--text-muted); }
 
         /* Responsive Configuration */
         @media (max-width: 768px) {
@@ -252,9 +279,10 @@
 
     <!-- Navigation Menu -->
     <div class="sidebar">
-        <a href="#" class="active" data-target="dashboard"><i class="fa-solid fa-chart-pie" style="margin-right: 12px; font-size: 1rem;"></i>Dashboard</a>
-        <a href="#" data-target="frame"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 12px; font-size: 1rem;"></i>Escalated Leaves</a>
-        <a href="#" data-target="frame"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 12px; font-size: 1rem;"></i>History</a>
+        <a href="#" class="active" data-target="escalated-leaves"><i class="fa-solid fa-chart-pie" style="margin-right: 12px; font-size: 1rem;"></i>Dashboard</a>
+        <a href="#" data-target="escalated-leaves"><i class="fa-solid fa-triangle-exclamation" style="margin-right: 12px; font-size: 1rem;"></i>Escalated Leaves</a>
+        <a href="#" data-target="all-applications"><i class="fa-solid fa-file-lines" style="margin-right: 12px; font-size: 1rem;"></i>All Applications</a>
+        <a href="#" data-target="history"><i class="fa-solid fa-clock-rotate-left" style="margin-right: 12px; font-size: 1rem;"></i>History</a>
         <a href="{% url 'logout' %}" style="margin-top: auto; color: #f87171;"><i class="fa-solid fa-right-from-bracket" style="margin-right: 12px; font-size: 1rem;"></i>Logout</a>
     </div>
 
@@ -264,7 +292,7 @@
         <div id="default-dashboard-content">
 
         <!-- Escalated Leave Queue -->
-        <div class="card">
+        <div class="card dashboard-section active-section" id="escalated-leaves">
             <h3>Forwarded Leave Requests</h3>
             <table>
                 <thead>
@@ -279,11 +307,12 @@
                 <tbody>
                     {% for leave in escalated_leaves %}
                     <tr>
-                        <td style="font-weight: 600;">{{ leave.student.name }}</td>
+                        <td style="font-weight: 600;">{{ leave.display_name }}</td>
                         <td>{{ leave.from_date }}</td>
                         <td>{{ leave.to_date }}</td>
                         <td>{{ leave.reason }}</td>
                         <td>
+                            <a class="view-link" href="{% url 'view_leave_application' leave.id %}">View Full Form</a>
                             <form method="POST" action="{% url 'hod_approve' leave.id %}" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn approve" style="margin-right: 4px;">Approve</button>
@@ -304,8 +333,43 @@
             </table>
         </div>
 
+        <!-- All Applications -->
+        <div class="card dashboard-section" id="all-applications">
+            <h3>All Leave Applications</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Current Status</th>
+                        <th>Full Form</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for leave in all_applications %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ leave.display_name }}</td>
+                        <td>{{ leave.from_date }}</td>
+                        <td>{{ leave.to_date }}</td>
+                        <td>
+                            <span class="badge {{ leave.status|lower }}">
+                                {{ leave.status }}
+                            </span>
+                        </td>
+                        <td><a class="view-link" href="{% url 'view_leave_application' leave.id %}">Read Application</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 32px 0;">No Leave Applications Found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
         <!-- History -->
-        <div class="card">
+        <div class="card dashboard-section" id="history">
             <h3>Recent History</h3>
             <table>
                 <thead>
@@ -319,7 +383,7 @@
                 <tbody>
                     {% for leave in history_leaves %}
                     <tr>
-                        <td style="font-weight: 600;">{{ leave.student.name }}</td>
+                        <td style="font-weight: 600;">{{ leave.display_name }}</td>
                         <td>{{ leave.from_date }}</td>
                         <td>{{ leave.to_date }}</td>
                         <td>
@@ -339,9 +403,6 @@
         
         </div> <!-- End default-dashboard-content -->
         
-        <!-- Iframe Container -->
-        <iframe name="dashboard_frame" id="dashboard_frame" style="width:100%; height:100%; min-height: 500px; display:none; border:none; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); border: 1px solid var(--border);"></iframe>
-
     </div>
 </div>
 
@@ -350,21 +411,22 @@
         link.addEventListener('click', function(e) {
             if (this.getAttribute('href').includes('logout')) return;
 
-            if (this.getAttribute('data-target') === 'frame') {
-                if (this.getAttribute('href') === '#') e.preventDefault(); // ignore empty links
-                document.getElementById('default-dashboard-content').style.display = 'none';
-                document.getElementById('dashboard_frame').style.display = 'block';
-                
-                document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
-            } 
-            else if (this.getAttribute('data-target') === 'dashboard') {
-                e.preventDefault();
-                document.getElementById('default-dashboard-content').style.display = 'block';
-                document.getElementById('dashboard_frame').style.display = 'none';
+            e.preventDefault();
 
-                document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
-                this.classList.add('active');
+            document.querySelectorAll('.sidebar a').forEach(el => el.classList.remove('active'));
+            this.classList.add('active');
+
+            const target = this.dataset.target;
+            if (!target) return;
+
+            document.querySelectorAll('.dashboard-section').forEach(section => {
+                section.classList.remove('active-section');
+            });
+
+            const targetSection = document.getElementById(target);
+            if (targetSection) {
+                targetSection.classList.add('active-section');
+                document.querySelector('.main').scrollTop = 0;
             }
         });
     });
