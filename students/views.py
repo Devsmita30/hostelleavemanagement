@@ -1,6 +1,9 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
+from django.conf import settings
+from django.core.mail import send_mail
 from django.db.models import Q
+from django.views.decorators.http import require_POST
 
 from .models import Student, Leave, Rector, ParentNotification, Proctor, HOD
 
@@ -57,14 +60,24 @@ def get_role_dashboard_url(role):
 
     return 'login'
 
+def normalize_hostel(hostel):
+    hostel = str(hostel).strip()
+
+    if hostel.startswith("Hostel Block"):
+        return hostel
+
+    return f"Hostel Block {hostel}"
 
 def role_leave_queryset(request):
     role = request.session.get('role')
 
     if role == 'rector':
-        hostel = request.session.get('hostel_block')
-        return Leave.objects.filter(student__hostel_block=hostel)
-
+        hostel = normalize_hostel(
+        request.session.get('hostel_block')
+    )
+        return Leave.objects.filter(
+        student__hostel_block__icontains=f"Block {hostel}"
+    )
     if role == 'proctor':
         try:
             proctor = Proctor.objects.get(id=request.session.get('proctor_id'))
@@ -268,7 +281,7 @@ def rector_login(request):
             request.session['role'] = 'rector'
             request.session['rector_id'] = rector.id
             request.session['rector_name'] = rector.username
-            request.session['hostel_block'] = rector.hostel_block
+            request.session['hostel_block'] = rector.hostel_block.strip()
 
             return redirect("rector_dashboard")
 
@@ -284,19 +297,20 @@ def rector_dashboard(request):
     if request.session.get('role') != 'rector':
         return redirect("rector_login")
 
-    hostel = request.session.get('hostel_block')
-
+    hostel = normalize_hostel(
+    request.session.get('hostel_block')
+)
     # Students awaiting verification
     unverified_students = Student.objects.filter(
         verified=False,
-        hostel_block=hostel
+        hostel_block__iexact=hostel.strip()
     )
 
     # All leaves for this hostel that are ready for Rector approval.
     # Route 1: Proctor approved directly.
     # Route 2: Proctor forwarded to HOD and HOD approved.
     all_leaves = Leave.objects.filter(
-        student__hostel_block=hostel,
+        student__hostel_block__icontains=hostel
     ).filter(
         Q(proctor_status="Approved") | Q(hod_status="Approved")
     )
@@ -368,6 +382,25 @@ def send_parent_gate_pass_notification(leave):
         f"Gate Pass Status: {gate_pass_status}"
     )
 
+    notification_status = "Sent"
+
+    if leave.parent_email:
+        try:
+            print("EMAIL:", leave.parent_email)
+            print("FROM:", settings.EMAIL_HOST_USER)
+            send_mail(
+                subject=f"Gate Pass Generated for {leave.display_name}",
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[leave.parent_email],
+                fail_silently=False,
+            )
+        except Exception as error:
+            notification_status = "Email Failed"
+            print(f"Parent email failed for leave #{leave.id}: {error}")
+    else:
+        notification_status = "No Email"
+
     ParentNotification.objects.update_or_create(
         leave=leave,
         defaults={
@@ -376,24 +409,33 @@ def send_parent_gate_pass_notification(leave):
             "parent_email": leave.parent_email,
             "message": message,
             "gate_pass_status": gate_pass_status,
-            "status": "Sent",
+            "status": notification_status,
         },
     )
 
-    # Simulated Parent Notifications in Terminal
+    # SMS/WhatsApp needs an external gateway such as Twilio or MSG91.
+    # Until credentials are configured, keep a terminal log of the parent alert.
     print("\n" + "="*50)
-    print(" [PARENT NOTIFICATION SENT SUCCESSFULLY]")
+    print(" [PARENT GATE PASS NOTIFICATION]")
     print(f" To: {leave.parent_name}")
-    print(f" SMS sent to mobile: {leave.parent_phone}")
-    print(f" Email sent to: {leave.parent_email}")
+    print(f" SMS/Message queued for mobile: {leave.parent_phone}")
+    print(f" Email status: {notification_status} ({leave.parent_email or 'N/A'})")
     print("-"*50)
     print(message)
     print("="*50 + "\n")
 
 
+@require_POST
 def rector_approve(request, id):
 
-    leave = Leave.objects.get(id=id)
+    if request.session.get('role') != 'rector':
+        return redirect("rector_login")
+
+    leave = get_object_or_404(Leave, id=id)
+
+    if leave.proctor_status != "Approved" and leave.hod_status != "Approved":
+        messages.error(request, "This leave request is not ready for rector approval.")
+        return redirect('rector_dashboard')
 
     leave.rector_status = 'Approved'
     leave.status = 'Approved'
@@ -405,9 +447,17 @@ def rector_approve(request, id):
     return redirect('rector_dashboard')
 
 
+@require_POST
 def rector_reject(request, id):
 
-    leave = Leave.objects.get(id=id)
+    if request.session.get('role') != 'rector':
+        return redirect("rector_login")
+
+    leave = get_object_or_404(role_leave_queryset(request), id=id)
+
+    if leave.proctor_status != "Approved" and leave.hod_status != "Approved":
+        messages.error(request, "This leave request is not ready for rector rejection.")
+        return redirect('rector_dashboard')
 
     leave.rector_status = 'Rejected'
     leave.status = 'Rejected'
@@ -490,12 +540,13 @@ def proctor_dashboard(request):
     })
 
 
+@require_POST
 def proctor_approve(request, id):
 
     if request.session.get('role') != 'proctor':
         return redirect("proctor_login")
 
-    leave = Leave.objects.get(id=id)
+    leave = get_object_or_404(role_leave_queryset(request), id=id, proctor_status="Pending", status="Pending")
 
     leave.proctor_status = "Approved"
     leave.rector_status = "Pending"
@@ -506,15 +557,20 @@ def proctor_approve(request, id):
     return redirect("proctor_dashboard")
 
 
-def proctor_reject(request, id):
+@require_POST
+def proctor_forward_hod(request, id):
 
     if request.session.get('role') != 'proctor':
         return redirect("proctor_login")
 
-    leave = Leave.objects.get(id=id)
+    leave = get_object_or_404(
+        role_leave_queryset(request),
+        id=id,
+        proctor_status="Pending",
+        status="Pending"
+    )
 
-    leave.proctor_status = "Rejected"
-    leave.rector_status = "NA"
+    leave.proctor_status = "Forwarded"
     leave.hod_status = "Pending"
 
     leave.save()
@@ -566,7 +622,7 @@ def hod_dashboard(request):
     semester = normalize_filter_value(hod.semester)
 
     leaves = Leave.objects.filter(
-        proctor_status="Rejected",
+        proctor_status="Forwarded",
         hod_status="Pending",
     ).filter(
         blank_student_department_filter(department),
@@ -574,7 +630,7 @@ def hod_dashboard(request):
     )
 
     history_leaves = Leave.objects.filter(
-        proctor_status="Rejected"
+        proctor_status="Forwarded"
     ).filter(
         blank_student_department_filter(department),
         blank_student_semester_filter(semester)
@@ -587,9 +643,19 @@ def hod_dashboard(request):
     })
 
 
+@require_POST
 def hod_approve(request, id):
 
-    leave = Leave.objects.get(id=id)
+    if request.session.get('role') != 'hod':
+        return redirect("hod_login")
+
+    leave = get_object_or_404(
+        role_leave_queryset(request),
+        id=id,
+        proctor_status="Forwarded",
+        hod_status="Pending",
+        status="Pending",
+    )
 
     leave.hod_status = "Approved"
     leave.rector_status = "Pending"
@@ -600,11 +666,22 @@ def hod_approve(request, id):
     return redirect("hod_dashboard")
 
 
+@require_POST
 def hod_reject(request, id):
 
-    leave = Leave.objects.get(id=id)
+    if request.session.get('role') != 'hod':
+        return redirect("hod_login")
+
+    leave = get_object_or_404(
+        role_leave_queryset(request),
+        id=id,
+        proctor_status="Forwarded",
+        hod_status="Pending",
+        status="Pending",
+    )
 
     leave.hod_status = "Rejected"
+    leave.rector_status = "NA"
     leave.status = "Rejected"
 
     leave.save()
@@ -613,9 +690,17 @@ def hod_reject(request, id):
 
 
 # ----------- STUDENT VERIFICATION ------------
+@require_POST
 def verify_student(request, id):
 
-    student = Student.objects.get(id=id)
+    if request.session.get('role') != 'rector':
+        return redirect("rector_login")
+
+    student = get_object_or_404(
+        Student,
+        id=id,
+        hostel_block__icontains=request.session.get('hostel_block'),
+    )
 
     student.verified = True
 
@@ -631,7 +716,7 @@ def view_leave_application(request, leave_id):
     if role not in ['rector', 'proctor', 'hod']:
         return redirect('login')
 
-    leave = get_object_or_404(role_leave_queryset(request), id=leave_id)
+    leave = get_object_or_404(Leave, id=leave_id)
 
     return render(request, "leave_application_detail.html", {
         "leave": leave,

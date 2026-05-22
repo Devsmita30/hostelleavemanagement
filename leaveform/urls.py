@@ -29,7 +29,7 @@ urlpatterns = [
     path('proctor/', views.proctor_login, name='proctor'),
     path('proctor_dashboard/', views.proctor_dashboard, name='proctor_dashboard'),
     path('proctor_approve/<int:id>/', views.proctor_approve, name='proctor_approve'),
-    path('proctor_reject/<int:id>/', views.proctor_reject, name='proctor_reject'),
+    path('proctor_forward_hod/<int:id>/', views.proctor_forward_hod, name='proctor_forward_hod'),
 
     # HOD
     path('hod_login/', views.hod_login, name='hod_login'),

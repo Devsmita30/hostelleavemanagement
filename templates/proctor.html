@@ -316,7 +316,7 @@
                             </form>
 
                             <!-- Do not approve, forward to HOD -->
-                            <form method="POST" action="{% url 'proctor_reject' leave.id %}" style="display:inline;">
+                            <form method="POST" action="{% url 'proctor_forward_hod' leave.id %}" style="display:inline;">
                                 {% csrf_token %}
                                 <button type="submit" class="btn" style="background: var(--info); color:white; transition: all 0.2s ease; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onmouseover="this.style.background='#1d4ed8'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 12px rgba(37, 99, 235, 0.2)'" onmouseout="this.style.background='var(--info)'; this.style.transform='translateY(0)'; this.style.boxShadow='0 1px 2px rgba(0,0,0,0.05)'">Forward to HOD</button>
                             </form>
@@ -406,6 +406,14 @@
 </div>
 
 <script>
+    document.querySelectorAll('a[href*="/logout"]').forEach(link => {
+        link.addEventListener('click', function(e) {
+            if (!confirm('Are you sure you want to logout?')) {
+                e.preventDefault();
+            }
+        });
+    });
+
     document.querySelectorAll('.sidebar a').forEach(link => {
         link.addEventListener('click', function(e) {
             if (this.getAttribute('href') && this.getAttribute('href').includes('logout')) return;

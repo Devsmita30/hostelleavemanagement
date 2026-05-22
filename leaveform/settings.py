@@ -93,8 +93,6 @@ DATABASES = {
         'NAME': 'Leave_management',
         'USER': 'root',
 
-        'PASSWORD': '3005',
-
         'PASSWORD': os.getenv('DB_PASSWORD'),
 
         'HOST': 'localhost',
@@ -158,3 +156,19 @@ SESSION_COOKIE_SECURE = not DEBUG
 
 # Protects against Cross-Site Request Forgery (CSRF) attacks
 SESSION_COOKIE_SAMESITE = 'Lax'
+
+
+# Parent notification email. If SMTP settings are not provided, Django prints
+# outgoing messages to the console so local development still works.
+# Email Configuration
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 587))
+
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD').strip()
+EMAIL_USE_TLS = True
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

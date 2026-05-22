@@ -364,17 +364,17 @@
             <div class="card-container">
                 <div class="card pending">
                     <h3>Pending Leaves</h3>
-                    <p>0</p>
+                    <p>{{ pending_count }}</p>
                 </div>
 
                 <div class="card approved">
                     <h3>Approved Leaves</h3>
-                    <p>0</p>
+                    <p>{{ approved_count }}</p>
                 </div>
 
                 <div class="card rejected">
                     <h3>Rejected Leaves</h3>
-                    <p>0</p>
+                    <p>{{ rejected_count }}</p>
                 </div>
             </div>
 
@@ -392,12 +392,18 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% for leave in recent_leaves %}
                         <tr>
-                            <td style="font-weight: 600; color: var(--primary);"> 0 </td>
-                            <td> ---- </td>
-                            <td> ---- </td>
-                            <td><span>   -  </span></td>
+                            <td style="font-weight: 600; color: var(--primary);">#L{{ leave.id }}</td>
+                            <td>{{ leave.from_date }}</td>
+                            <td>{{ leave.to_date }}</td>
+                            <td><span class="status {{ leave.status|lower }}">{{ leave.status }}</span></td>
                         </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty">No leave applications yet</td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
@@ -412,6 +418,14 @@
     </div>
 
     <script>
+        document.querySelectorAll('a[href*="/logout"]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (!confirm('Are you sure you want to logout?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+
         document.querySelectorAll('.sidebar a').forEach(link => {
             link.addEventListener('click', function(e) {
                 // Ignore logout links

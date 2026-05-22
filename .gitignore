@@ -1,6 +1,11 @@
 # Sensitive Environment Credentials
 .env
 .env.local
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
 
 # Virtual Environments
 env/

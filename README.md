@@ -112,6 +112,15 @@ DB_USER=root
 DB_PASSWORD=yourpassword
 DB_HOST=localhost
 DB_PORT=3306
+
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your_email@gmail.com
+EMAIL_HOST_PASSWORD=your_16_character_app_password
+EMAIL_USE_TLS=True
+
+DEFAULT_FROM_EMAIL=your_email@gmail.com
 ```
 
 ---
@@ -136,3 +145,28 @@ Open browser:
 ```text
 http://127.0.0.1:8000/
 ```
+
+# Email Configuration
+
+This project uses Gmail SMTP for sending parent notifications.
+
+To enable email notifications:
+
+1. Enable 2-Step Verification in your Gmail account
+2. Generate a Gmail App Password
+3. Use the generated App Password in:
+
+```env
+EMAIL_HOST_PASSWORD=your_app_password
+```
+
+---
+
+# Important Notes
+
+- Do NOT upload `.env` file to GitHub
+- Do NOT upload virtual environment folders (`env/`, `venv/`)
+- Add `.env` inside `.gitignore`
+- Use App Password instead of your Gmail password
+
+---
