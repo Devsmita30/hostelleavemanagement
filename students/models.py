@@ -13,15 +13,16 @@ class Student(models.Model):
     department = models.CharField(max_length=50)
     semester = models.CharField(max_length=20)
 
-    '''student_mobile = models.CharField(max_length=10)
+    student_mobile = models.CharField(max_length=10, blank=True, null=True)
 
-    father_name = models.CharField(max_length=100)
-    mother_name = models.CharField(max_length=100)
+    father_name = models.CharField(max_length=100, blank=True, null=True)
+    mother_name = models.CharField(max_length=100, blank=True, null=True)
 
-    parent_mobile = models.CharField(max_length=10)
-    parent_email = models.EmailField()'''
+    parent_mobile = models.CharField(max_length=10, blank=True, null=True)
+    parent_email = models.EmailField(blank=True, null=True)
 
     verified = models.BooleanField(default=False)
+    rejected = models.BooleanField(default=False)
 
     def __str__(self):
         return self.full_name

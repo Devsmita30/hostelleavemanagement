@@ -61,23 +61,50 @@ def get_role_dashboard_url(role):
     return 'login'
 
 def normalize_hostel(hostel):
-    hostel = str(hostel).strip()
+    hostel = normalize_filter_value(hostel)
 
-    if hostel.startswith("Hostel Block"):
+    if not hostel:
+        return ''
+
+    if hostel.lower().startswith("hostel block "):
         return hostel
 
-    return f"Hostel Block {hostel}"
+    if hostel.lower().startswith("block "):
+        return f"Hostel Block {hostel[6:].strip()}"
+
+    if len(hostel) == 1 and hostel.isalpha():
+        return f"Hostel Block {hostel.upper()}"
+
+    return hostel
+
+
+def hostel_block_query(field_name, hostel):
+    hostel = normalize_filter_value(hostel)
+
+    if not hostel:
+        return Q(pk__in=[])
+
+    normalized = normalize_hostel(hostel)
+    variants = {hostel, normalized}
+
+    if normalized.lower().startswith("hostel block "):
+        suffix = normalized[len("Hostel Block "):].strip()
+        variants.update({suffix, f"Block {suffix}"})
+
+    query = Q()
+    for variant in variants:
+        if variant:
+            query |= Q(**{f"{field_name}__iexact": variant})
+
+    return query
 
 def role_leave_queryset(request):
     role = request.session.get('role')
 
     if role == 'rector':
-        hostel = normalize_hostel(
-        request.session.get('hostel_block')
-    )
         return Leave.objects.filter(
-        student__hostel_block__icontains=f"Block {hostel}"
-    )
+            hostel_block_query('student__hostel_block', request.session.get('hostel_block'))
+        )
     if role == 'proctor':
         try:
             proctor = Proctor.objects.get(id=request.session.get('proctor_id'))
@@ -116,17 +143,31 @@ def student(request):
 
 def student_signup(request):
     if request.method == "POST":
+        enrollment_no = request.POST.get('enrollment_no')
+
+        if Student.objects.filter(enrollment_no=enrollment_no).exists():
+            messages.error(request, "A student with this enrollment number is already registered.")
+            return redirect('student_signup')
+
         Student.objects.create(
             full_name=request.POST.get('full_name'),
-            enrollment_no=request.POST.get('enrollment_no'),
+            enrollment_no=enrollment_no,
             email=request.POST.get('email'),
             hostel_block=request.POST.get('hostel_block'),
             room_number=request.POST.get('room_number'),
             department=request.POST.get('department', ''),
             semester=request.POST.get('semester', ''),
-            password=request.POST.get('password')
+            student_mobile=request.POST.get('student_mobile'),
+            father_name=request.POST.get('father_name'),
+            mother_name=request.POST.get('mother_name'),
+            parent_mobile=request.POST.get('parent_mobile'),
+            parent_email=request.POST.get('parent_email'),
+            password=request.POST.get('password'),
+            verified=False,
+            rejected=False
         )
 
+        messages.success(request, "Registration request sent to the rector. You can log in after approval.")
         return redirect('student_login')
 
     return render(request, "student_signup.html")
@@ -297,20 +338,17 @@ def rector_dashboard(request):
     if request.session.get('role') != 'rector':
         return redirect("rector_login")
 
-    hostel = normalize_hostel(
-    request.session.get('hostel_block')
-)
     # Students awaiting verification
     unverified_students = Student.objects.filter(
         verified=False,
-        hostel_block__iexact=hostel.strip()
-    )
+        rejected=False,
+    ).order_by('-id')
 
     # All leaves for this hostel that are ready for Rector approval.
     # Route 1: Proctor approved directly.
     # Route 2: Proctor forwarded to HOD and HOD approved.
     all_leaves = Leave.objects.filter(
-        student__hostel_block__icontains=hostel
+        hostel_block_query('student__hostel_block', request.session.get('hostel_block'))
     ).filter(
         Q(proctor_status="Approved") | Q(hod_status="Approved")
     )
@@ -699,13 +737,45 @@ def verify_student(request, id):
     student = get_object_or_404(
         Student,
         id=id,
-        hostel_block__icontains=request.session.get('hostel_block'),
+        verified=False,
+        rejected=False,
     )
 
     student.verified = True
+    student.rejected = False
 
     student.save()
 
+    return redirect('rector_dashboard')
+
+
+def view_student_registration(request, id):
+    if request.session.get('role') != 'rector':
+        return redirect("rector_login")
+
+    student = get_object_or_404(Student, id=id)
+
+    return render(request, "student_registration_detail.html", {
+        "student": student,
+    })
+
+
+@require_POST
+def reject_student(request, id):
+    if request.session.get('role') != 'rector':
+        return redirect("rector_login")
+
+    student = get_object_or_404(
+        Student,
+        id=id,
+        verified=False,
+        rejected=False,
+    )
+
+    student.rejected = True
+    student.save()
+
+    messages.success(request, "Student registration request rejected.")
     return redirect('rector_dashboard')
 
 
