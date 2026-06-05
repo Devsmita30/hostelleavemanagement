@@ -102,7 +102,7 @@
         <h2>Student Login</h2>
         {% if messages %}
         {% for message in messages %}
-        <p style="color:red; text-align:center;">{{ message }}</p>
+        <p style="color:{% if message.tags == 'success' %}green{% else %}red{% endif %}; text-align:center;">{{ message }}</p>
         {% endfor %}
         {% endif %}
 

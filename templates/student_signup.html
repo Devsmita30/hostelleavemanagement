@@ -103,6 +103,11 @@
 <body>
     <div class="signup-container">
         <h2>Student Sign Up</h2>
+        {% if messages %}
+        {% for message in messages %}
+        <p style="color:{% if message.tags == 'success' %}green{% else %}red{% endif %}; text-align:center; margin-bottom: 12px;">{{ message }}</p>
+        {% endfor %}
+        {% endif %}
 <!--Form-->
         <form method="POST" action="{% url 'student_signup' %}">
     {% csrf_token %}

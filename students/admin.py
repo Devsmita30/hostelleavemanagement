@@ -4,9 +4,9 @@ from .models import Student, Leave, Rector, Proctor, HOD, ParentNotification
 # Register your models here.
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ['full_name', 'enrollment_no', 'email', 'hostel_block', 'room_number', 'verified']
+    list_display = ['full_name', 'enrollment_no', 'email', 'hostel_block', 'room_number', 'verified', 'rejected']
     search_fields = ['full_name', 'enrollment_no', 'email']
-    list_filter = ['verified', 'hostel_block']
+    list_filter = ['verified', 'rejected', 'hostel_block']
 
 @admin.register(Leave)
 class LeaveAdmin(admin.ModelAdmin):
