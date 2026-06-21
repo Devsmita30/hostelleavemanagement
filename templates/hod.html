@@ -22,6 +22,8 @@
             /* Modernized Alert Colors */
             --success: #16a34a;
             --success-light: #f0fdf4;
+            --warning: #f59e0b;
+            --warning-light: #fffbeb;
             --danger: #dc2626;
             --danger-light: #fef2f2;
         }
@@ -142,6 +144,85 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.02);
         }
 
+        .stat-card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 36px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            padding: 26px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            border-left: 5px solid var(--primary);
+            display: flex;
+            flex-direction: column-reverse;
+            justify-content: center;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            background: linear-gradient(135deg, var(--primary), transparent);
+        }
+
+        .stat-card h3 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--text-main);
+            margin-top: 8px;
+            margin-bottom: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            border-left-width: 8px;
+            box-shadow: 0 12px 20px -8px rgba(37, 99, 235, 0.25);
+        }
+
+        .stat-card:hover::before { opacity: 0.08; }
+        .stat-card:hover h3, .stat-card:hover p { transform: translateX(4px); }
+
+        .stat-card.is-pending { border-left-color: var(--warning); }
+        .stat-card.is-pending h3 { color: var(--warning); }
+        .stat-card.is-pending::before { background: linear-gradient(135deg, var(--warning), transparent); }
+        .stat-card.is-pending:hover { box-shadow: 0 12px 20px -8px rgba(245, 158, 11, 0.25); }
+
+        .stat-card.is-approved { border-left-color: var(--success); }
+        .stat-card.is-approved h3 { color: var(--success); }
+        .stat-card.is-approved::before { background: linear-gradient(135deg, var(--success), transparent); }
+        .stat-card.is-approved:hover { box-shadow: 0 12px 20px -8px rgba(22, 163, 74, 0.25); }
+
+        .stat-card.is-rejected { border-left-color: var(--danger); }
+        .stat-card.is-rejected h3 { color: var(--danger); }
+        .stat-card.is-rejected::before { background: linear-gradient(135deg, var(--danger), transparent); }
+        .stat-card.is-rejected:hover { box-shadow: 0 12px 20px -8px rgba(220, 38, 38, 0.25); }
+
         h3 {
             font-size: 1.1rem;
             font-weight: 600;
@@ -256,7 +337,7 @@
         }
 
         .approved { background: var(--success-light); color: var(--success); }
-        .pending { background: #fffbeb; color: #f59e0b; }
+        .pending { background: var(--warning-light); color: var(--warning); }
         .rejected { background: var(--danger-light); color: var(--danger); }
         .na { background: #f1f5f9; color: var(--text-muted); }
 
@@ -291,8 +372,37 @@
         
         <div id="default-dashboard-content">
 
-        <!-- Escalated Leave Queue -->
-        <div class="card dashboard-section active-section" id="escalated-leaves">
+        <!-- Dashboard Header & Stats -->
+        <div class="dashboard-section active-section" id="escalated-leaves">
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">HOD Dashboard</h2>
+
+            <!-- Stats Cards -->
+            <div class="stat-card-container">
+
+                <div class="stat-card">
+                    <h3>{{ total }}</h3>
+                    <p>Total Requests</p>
+                </div>
+
+                <div class="stat-card is-pending">
+                    <h3>{{ pending_count }}</h3>
+                    <p>Pending</p>
+                </div>
+
+                <div class="stat-card is-approved">
+                    <h3>{{ approved_count }}</h3>
+                    <p>Approved</p>
+                </div>
+
+                <div class="stat-card is-rejected">
+                    <h3>{{ rejected_count }}</h3>
+                    <p>Rejected</p>
+                </div>
+
+            </div>
+
+            <!-- Forwarded Leave Requests Table -->
+            <div class="card" style="margin-bottom: 0;">
             <h3>Forwarded Leave Requests</h3>
             <table>
                 <thead>
@@ -331,6 +441,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            </div>
         </div>
 
         <!-- All Applications -->
