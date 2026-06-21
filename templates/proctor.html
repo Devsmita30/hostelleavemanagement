@@ -144,6 +144,97 @@
             margin-bottom: 30px;
         }
 
+        /* Stat Cards — matches Rector dashboard style */
+        .stat-card {
+            background: #ffffff;
+            padding: 26px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column-reverse;
+            justify-content: center;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.02);
+            border-left: 5px solid var(--primary);
+        }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            opacity: 0.03;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            background: linear-gradient(135deg, var(--primary), transparent);
+        }
+        .stat-card h3 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--text-main);
+            margin-top: 8px;
+            margin-bottom: 0;
+            transition: transform 0.3s ease;
+        }
+        .stat-card p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.75px;
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-6px);
+            border-left-width: 8px;
+            border-left-color: var(--primary);
+            box-shadow: 0 12px 20px -8px rgba(37, 99, 235, 0.25);
+        }
+        .stat-card:hover::before { opacity: 0.08; }
+        .stat-card:hover h3, .stat-card:hover p { transform: translateX(4px); }
+
+        .stat-card.is-pending { border-left-color: #f59e0b; }
+        .stat-card.is-pending h3 { color: #f59e0b; }
+        .stat-card.is-pending::before { background: linear-gradient(135deg, #f59e0b, transparent); }
+        .stat-card.is-pending:hover {
+            border-left-color: #f59e0b;
+            box-shadow: 0 12px 20px -8px rgba(245, 158, 11, 0.25);
+        }
+
+        .stat-card.is-approved { border-left-color: var(--success); }
+        .stat-card.is-approved h3 { color: var(--success); }
+        .stat-card.is-approved::before { background: linear-gradient(135deg, var(--success), transparent); }
+        .stat-card.is-approved:hover {
+            border-left-color: var(--success);
+            box-shadow: 0 12px 20px -8px rgba(22, 163, 74, 0.25);
+        }
+
+        .stat-card.is-forwarded { border-left-color: var(--info); }
+        .stat-card.is-forwarded h3 { color: var(--info); }
+        .stat-card.is-forwarded::before { background: linear-gradient(135deg, var(--info), transparent); }
+        .stat-card.is-forwarded:hover {
+            border-left-color: var(--info);
+            box-shadow: 0 12px 20px -8px rgba(37, 99, 235, 0.25);
+        }
+
+        .stat-card.is-rejected { border-left-color: var(--danger); }
+        .stat-card.is-rejected h3 { color: var(--danger); }
+        .stat-card.is-rejected::before { background: linear-gradient(135deg, var(--danger), transparent); }
+        .stat-card.is-rejected:hover {
+            border-left-color: var(--danger);
+            box-shadow: 0 12px 20px -8px rgba(220, 38, 38, 0.25);
+        }
+
+        .stat-card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-bottom: 36px;
+        }
+
         h3 {
             font-size: 1.1rem;
             font-weight: 600;
@@ -286,8 +377,37 @@
         
         <div id="default-dashboard-content">
 
-        <!-- Pending Queue -->
-        <div class="card dashboard-section active-section" id="pending-requests">
+        <!-- Dashboard Header & Stats -->
+        <div class="dashboard-section active-section" id="pending-requests">
+            <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">Proctor Dashboard</h2>
+
+            <!-- Stats Cards -->
+            <div class="stat-card-container">
+
+                <div class="stat-card">
+                    <h3>{{ total }}</h3>
+                    <p>Total Requests</p>
+                </div>
+
+                <div class="stat-card is-pending">
+                    <h3>{{ pending_count }}</h3>
+                    <p>Pending</p>
+                </div>
+
+                <div class="stat-card is-approved">
+                    <h3>{{ approved_count }}</h3>
+                    <p>Approved</p>
+                </div>
+
+                <div class="stat-card is-forwarded">
+                    <h3>{{ forwarded_count }}</h3>
+                    <p>Forwarded to HOD</p>
+                </div>
+
+            </div>
+
+            <!-- Pending Leave Requests Table -->
+            <div class="card" style="margin-bottom: 0;">
             <h3>Pending Leave Requests</h3>
 
             <table>
@@ -329,6 +449,7 @@
                     {% endfor %}
                 </tbody>
             </table>
+            </div>
         </div>
 
         <!-- All Applications -->
